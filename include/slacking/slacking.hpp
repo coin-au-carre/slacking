@@ -52,7 +52,8 @@ struct Element {
 };
 
 //! Free function which looks like python join
-inline std::string join(const std::vector<Element>& elements, const std::string sep = "&") {
+inline
+std::string join(const std::vector<Element>& elements, const std::string sep = "&") {
     if (elements.size() == 0) return "";
     auto str = std::string{elements[0].to_string()};
     for (size_t i = 1; i < elements.size(); i ++) {
@@ -165,6 +166,7 @@ private:
     std::string     icon_emoji_;
 };
 
+inline
 Slacking& createInstance(   const std::string& token, 
                             const std::string& channel = "", 
                             const std::string& username = "", 
@@ -173,22 +175,27 @@ Slacking& createInstance(   const std::string& token,
     return instance;
 }
 
+inline
 Slacking& instance() {
     return createInstance("");
 }
 
+inline
 void apiTest() {
     instance().apiTest();
 }
 
+inline
 void chat_postMessage(const std::string& text) {
     instance().chat_postMessage(text);
 }
 
+inline
 Json users_list() {
     return instance().users_list();
 }
 
+inline
 void post(const std::string& method, std::vector<Element> elements) {
     instance().post(method, elements);
 }

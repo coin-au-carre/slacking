@@ -6,19 +6,6 @@ Slacking
 *Slacking* is a C++11 header only library for communicating with the [Slack Web API](https://api.slack.com/web).  
 *Slacking* aims to be easy to use. 
 
-### Requirements
-
-+ C++11 compatible compiler. Tested with Clang and GCC. 
-+ [libcurl](https://curl.haxx.se/libcurl/) (used by [C++ Requests](https://github.com/whoshuu/cpr))
-
-Note: *Slacking* uses [CPR C++ Requests](https://github.com/whoshuu/cpr) and [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project. 
-C++ Requests have been rewritten in order to be a header only library. Hence, you do not have to install CPR nor Nlohmann json. 
-
-### Installation
-
-Just copy the `include/slacking` header files in your project. That's all.  
-(If you already have C++ Requests and Nlohmann Json installed then you could even just copy `slacking.hpp`)
-
 ### Usage
 
 You can create a slack instance this way.
@@ -42,10 +29,23 @@ slack::post (
                     {"username"  , "peach"                  }, 
                     {"icon_emoji", ":princess:"             } 
                 }
-            );
+            ); // note that "token" is not needed here it is automatically inserted when using slack::post()
 ```
 
 If you want verbose output, add the following compilation flag: `-DSLACKING_VERBOSE_OUTPUT=1`.
+
+### Requirements
+
++ C++11 compatible compiler. Tested with Clang and GCC. 
++ [libcurl](https://curl.haxx.se/libcurl/) (used by [C++ Requests](https://github.com/whoshuu/cpr))
+
+Note: *Slacking* uses [CPR C++ Requests](https://github.com/whoshuu/cpr) and [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project. 
+C++ Requests have been rewritten in order to be a header only library. Hence, you do not have to install CPR nor Nlohmann json. 
+
+### Installation
+
+Just copy the `include/slacking` header files in your project. That's all.  
+(If you already have C++ Requests and Nlohmann Json installed then you could even just copy `slacking.hpp`)
 
 ### Ongoing work
 
