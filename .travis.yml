@@ -1,0 +1,16 @@
+sudo: false
+language: cpp
+
+# before_script:
+#   - sudo apt-get update -qq
+#   - sudo apt-get install 
+
+compiler:
+  - gcc
+  - clang
+
+script:
+  - mkdir build
+  - cd build
+  - cmake .. && make
+
