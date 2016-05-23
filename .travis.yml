@@ -9,6 +9,10 @@ compiler:
   - gcc
   - clang
 
+branches:
+  only:
+    - devel
+
 script:
   - mkdir build
   - cd build
