@@ -12,7 +12,7 @@ Slacking
 
 You can create a slack instance this way.
 ```c++
-slack::createInstance("mytoken", "#mychannel", "botname", ":bird:"); // all parameters are optional.
+slack::createInstance("mytoken", "#mychannel", "botname", ":bird:"); // all parameters are optional except the first one (token).
 ```
 
 Calling Slack API method is easy
@@ -21,7 +21,7 @@ slack::chat_postMessage("Hello there!"); // will send the message "Hello there!"
 ```
 
 If you need top flexibility, then you can use the generic functions `slack::post` or `slack::get`.  
-Everything written in [there](https://api.slack.com/methods) is possible from here. 
+Everything available in [Web Slack API](https://api.slack.com/methods) is possible from here. 
 ```c++
 slack::post (   
                 "chat.postMessage",
@@ -42,12 +42,12 @@ If you want verbose output, add the following compilation flag: `-DSLACKING_VERB
 + [Curl](https://curl.haxx.se/libcurl/) (which you probably already have).
 
 Note: *Slacking* uses [CPR C++ Requests](https://github.com/whoshuu/cpr) and [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project. 
-C++ Requests have been rewritten in order to be a header only library. Hence, you do not have to install CPR nor Nlohmann json. 
+C++ Requests have been rewritten in order to be a header only library. Hence, you do not have to install anything! 
 
 ### Installation
 
 Just copy the `include/slacking` header files in your project. That's all.  
-(If you already have C++ Requests and Nlohmann Json installed then you could even just copy `slacking.hpp`)
+
 
 ### Ongoing work
 
@@ -77,10 +77,14 @@ _Use Meyers singleton_
 You can also use the singleton pattern, *Slacking* provides free functions `createInstance(const std::string& token)` for initialization and `instance()` when you need to call it. It should not be the recommended way but it is highly convenient. 
 
 
-### Dependencies (included in project)
+### Build the examples
 
-*Slacking* uses C++11 Requests and Nlohmann Json which are included in `external` folder. 
-Note: C++11 Requests is not a header only library.
+```
+mkdir build && cd build
+cmake .. && make
+examples/01-basic
+examples/02-basic
+```
 
 
 ### Next steps

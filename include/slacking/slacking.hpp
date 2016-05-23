@@ -64,7 +64,8 @@ std::string join(const std::vector<Element>& elements, const std::string sep = "
 
 class Slacking {
 public:
-    Slacking(const std::string& token = "", const std::string& channel = ""
+    Slacking() = delete;
+    Slacking(const std::string& token, const std::string& channel = ""
         , const std::string& username="Slacking bot", const std::string& icon_emoji="") 
     : session_{}, token_{token}, channel_{channel}, username_{username}, icon_emoji_{icon_emoji} {
         session_.SetUrl("https://slack.com/api/");
