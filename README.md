@@ -1,6 +1,8 @@
 Slacking
 --------
 
+[![Build Status](https://travis-ci.org/coin-au-carre/slacking.svg?branch=master)](https://travis-ci.org/coin-au-carre/slacking)
+
 ### Modern C++ people also uses Slack !
 
 *Slacking* is a C++11 header only library for communicating with the [Slack Web API](https://api.slack.com/web).  
@@ -36,8 +38,8 @@ If you want verbose output, add the following compilation flag: `-DSLACKING_VERB
 
 ### Requirements
 
-+ C++11 compatible compiler. Tested with Clang and GCC. 
-+ [libcurl](https://curl.haxx.se/libcurl/) (used by [C++ Requests](https://github.com/whoshuu/cpr))
++ C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7) and GCC (4.8, 4.9, 5).
++ [Curl](https://curl.haxx.se/libcurl/) (which you probably already have).
 
 Note: *Slacking* uses [CPR C++ Requests](https://github.com/whoshuu/cpr) and [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project. 
 C++ Requests have been rewritten in order to be a header only library. Hence, you do not have to install CPR nor Nlohmann json. 
