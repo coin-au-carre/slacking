@@ -18,9 +18,9 @@ public:
 
 // Pass by ref in parameter function
 void bar(slack::Slacking& slack) {
-    // 
+    // You can try catch API method if an error occur
     try {
-        slack.chat_postMessage("bar() function is called"); // ? is not possible
+        slack.chat_postMessage("bar() function is called");
     }
     catch(std::exception const& e) {
         std::cerr << e.what() << '\n';
@@ -38,5 +38,16 @@ int main() {
     slack::Slacking slack_instance{mytoken, "#mychannel", "botname", ":bird:"};
     bar(slack_instance);
     Foo foo{slack_instance};
+
+    // You can create other slack instances with different tokens and parameters
+    {
+        slack::Slacking another_slack_instance{"xxxx-xxxxxxxxx-xxxx", "#otherchannel", "dumbo", ":elephant:"};
+        try {
+            another_slack_instance.chat_postMessage("this should throw since token is invalid");
+        }
+        catch(std::exception const& e) {
+            std::cerr << e.what() << '\n';
+        }
+    }
 }
 

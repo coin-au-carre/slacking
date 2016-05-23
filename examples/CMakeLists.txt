@@ -9,11 +9,13 @@ include_directories(".")
 set (SOURCES_EXAMPLES 
     01-basic.cpp
     02-basic.cpp
+    03-users.cpp
 )
 
 set (TARGETS_EXAMPLES
     01-basic
     02-basic
+    03-users
 )
 
 foreach( name ${TARGETS_EXAMPLES} )

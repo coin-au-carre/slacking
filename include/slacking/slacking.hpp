@@ -23,10 +23,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
-#include <string>
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "cpr/cpr.h" // whoshuu/cpr
 #include "json/json.hpp"  // nlohmann/json
@@ -60,6 +60,29 @@ std::string join(const std::vector<Element>& elements, const std::string sep = "
         str += sep + elements[i].to_string();
     }
     return str;
+}
+
+struct User {
+    bool     is_bot;
+    czstring name;
+    czstring email;
+    czstring real_name;
+    czstring presence;
+private:
+    friend std::ostream & operator<<(std::ostream &os, const User& user);
+};
+
+std::ostream & operator<<(std::ostream &os, const User& user) {
+    std::string bot_str = user.is_bot ? "Bot" : "Human";
+    return os << '{' << user.name << " (" << user.real_name << " )" << user.email << '|' << bot_str << ':' << user.presence << '}';
+}
+
+std::ostream & operator<<(std::ostream &os, const std::vector<User>& users) {
+    os << '[';
+    for(auto const& user : users) {
+        os << user << ',';
+    }
+    return os << "\b]";
 }
 
 class Slacking {
@@ -121,9 +144,27 @@ public:
         auto json = post("chat.postMessage", elements);
     }
 
-    Json users_list() {
-        auto json = post("users.list", {{"token", token_.c_str()}});
+    Json users_list(bool presence = true) {
+        auto presence_char = presence ? "1" : "0";
+        auto json = post("users.list", {{"token", token_.c_str()}, {"presence", presence_char }});
         return json["members"];
+    }
+
+    std::vector<User> users_list_magic(bool presence = true) {
+        auto json_members = users_list(true);
+        auto users = std::vector<User>{};
+        users.reserve(json_members.size());
+        for (auto const& member : json_members) {
+            auto presence = member.count("presence") ? member["presence"].dump().c_str() : "";
+            auto email = member.count("email") ? member["email"].dump().c_str() : "";
+            bool is_bot = member["is_bot"];
+            users.emplace_back(User{is_bot, 
+                member["name"].dump().c_str(), 
+                email, 
+                member["profile"]["real_name"].dump().c_str(), 
+                presence});
+        }
+        return users;
     }
 
     void apiTest() { auto json = get("api.test"); }
@@ -192,8 +233,8 @@ void chat_postMessage(const std::string& text) {
 }
 
 inline
-Json users_list() {
-    return instance().users_list();
+Json users_list(bool presence = true) {
+    return instance().users_list(presence);
 }
 
 inline
