@@ -38,7 +38,7 @@ If you want verbose output, add the following compilation flag: `-DSLACKING_VERB
 
 ### Requirements
 
-+ C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7) and GCC (4.8, 4.9, 5).
++ C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7) and GCC (4.9, 5).
 + [Curl](https://curl.haxx.se/libcurl/) (which you probably already have).
 
 Note: *Slacking* uses [CPR C++ Requests](https://github.com/whoshuu/cpr) and [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project. 
