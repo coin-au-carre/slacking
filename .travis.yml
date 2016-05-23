@@ -5,14 +5,14 @@ language: cpp
 #   - sudo apt-get update -qq
 #   - sudo apt-get install 
 
-compiler:
-  - gcc
-  - clang
+# compiler:
+#   - gcc
+#   - clang
 
 branches:
   only:
     - devel
-
+    
 matrix:
   include:
     - compiler: gcc
@@ -53,5 +53,4 @@ matrix:
 script:
   - mkdir build
   - cd build
-  - cmake .. && make
-
+  - cmake -DCMAKE_CXX_COMPILER=$COMPILER .. && make
