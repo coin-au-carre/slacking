@@ -72,7 +72,7 @@ If you need any features feel free to ask and contribute.
 Manage Slacking instance
 ------------------------
 
-There are several approaches to keep alive the *Slacking* session in your program so you can use it anytime, anywhere.
+Here are two approaches to keep alive the *Slacking* session in your program so you can use it anytime, anywhere. 
 
 ####Use Meyers singleton
 
@@ -85,7 +85,7 @@ And when you are in another scope and you have lost the `slack` reference, you c
 ```c++
 auto slack& = slack::instance();
 ```
-It might not be the recommended way but since we generally handle only one Slacking instance, it is highly convenient. You can refer to [examples/01-basic.cpp](examples/01-basic.cpp)).
+It might not be the recommended way but since we generally handle only one Slacking instance, it is highly convenient. You can refer to the example usage and  [examples/01-basic.cpp](examples/01-basic.cpp)).
 
 ####Pass by reference (or by pointer)
 
@@ -98,6 +98,7 @@ void foo(slack::Slacking& slack) {
 
 int main() {
     slack::Slacking slack_instance{"xxx-xxx-xxx-xxx"};
+    foo(slack_instance);
 }
 ```
 
