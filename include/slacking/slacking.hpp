@@ -27,8 +27,9 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <sstream>
 
-#include "cpr/cpr.h" // whoshuu/cpr
+#include "cpr/cpr.h"      // whoshuu/cpr (modified header only version)
 #include "json/json.hpp"  // nlohmann/json
 
 #ifndef  SLACKING_VERBOSE_OUTPUT
@@ -44,14 +45,14 @@ using zwstring  = wchar_t *;
 using czstring  = const char *;
 using cwzstring = const wchar_t * ;
 
-//! Basic element types. Uses czstring so that it is a POD type.
+// Basic element types. Uses czstring so that it is a POD type.
 struct Element {
     czstring label;
     czstring value;
     std::string to_string() const { return std::string{label} + '=' + std::string{value}; }
 };
 
-//! Free function which looks like python join
+// Free function which looks like python join
 inline
 std::string join(const std::vector<Element>& elements, const std::string sep = "&") {
     if (elements.size() == 0) return "";
@@ -62,27 +63,44 @@ std::string join(const std::vector<Element>& elements, const std::string sep = "
     return str;
 }
 
+
+template<typename T>
+std::string join(const std::vector<T>& vec, const std::string sep = "&") {
+    std::stringstream ss;
+    if (vec.size() == 0) return "";
+    ss << vec[0];
+    for (size_t i = 1; i < vec.size(); i ++) {
+        ss << sep << vec[i];
+    }
+    return ss.str();
+}
+
+// User convenient structure for users.list
 struct User {
-    bool     is_bot;
-    czstring name;
-    czstring email;
-    czstring real_name;
-    czstring presence;
+    using string = std::string;
+    User(bool i, string n, string e, string r, string p) : is_bot{i}, name{n}, email{e}, real_name{r}, presence{p} {}
+    bool   is_bot; // someone who left the team is considered as bot? and slackbot is considered as human?
+    string name;
+    string email;
+    string real_name;
+    string presence;
 private:
     friend std::ostream & operator<<(std::ostream &os, const User& user);
 };
 
+inline
 std::ostream & operator<<(std::ostream &os, const User& user) {
     std::string bot_str = user.is_bot ? "Bot" : "Human";
-    return os << '{' << user.name << " (" << user.real_name << " )" << user.email << '|' << bot_str << ':' << user.presence << '}';
+    return os << "{ " << join(std::vector<std::string>{user.name, user.real_name, user.email, bot_str, user.presence}, ", ") << " }";
 }
 
+inline
 std::ostream & operator<<(std::ostream &os, const std::vector<User>& users) {
     os << '[';
     for(auto const& user : users) {
-        os << user << ',';
+        os << "\n  " << user << ',';
     }
-    return os << "\b]";
+    return os << "\b\n]";
 }
 
 class Slacking {
@@ -154,15 +172,12 @@ public:
         auto json_members = users_list(true);
         auto users = std::vector<User>{};
         users.reserve(json_members.size());
-        for (auto const& member : json_members) {
-            auto presence = member.count("presence") ? member["presence"].dump().c_str() : "";
-            auto email = member.count("email") ? member["email"].dump().c_str() : "";
-            bool is_bot = member["is_bot"];
-            users.emplace_back(User{is_bot, 
-                member["name"].dump().c_str(), 
-                email, 
-                member["profile"]["real_name"].dump().c_str(), 
-                presence});
+        for (auto member : json_members) {
+            auto presence = member.count("presence") ? member["presence"].dump() : "";
+            auto email = member["profile"].count("email") ? member["profile"]["email"].dump() : "";
+            bool is_bot = true;
+            if (member["is_bot"].is_boolean()) { is_bot = member["is_bot"]; }
+            users.push_back(User{is_bot, member["name"].dump(), email, member["profile"]["real_name"].dump(), presence});
         }
         return users;
     }

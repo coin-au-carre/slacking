@@ -6,7 +6,7 @@ Slacking
 Modern C++ people also uses Slack !
 -----------------------------------
 
-*Slacking* is a C++11 header only library for communicating with the [Slack Web API](https://api.slack.com/web).  
+*Slacking* is a lightweight **C++11 header only library** for communicating with the [Slack Web API](https://api.slack.com/web).  
 *Slacking* aims to be easy to use. 
 
 Example usage
@@ -32,8 +32,8 @@ slack::post (
                     {"channel"   , "#mychannel"             }, 
                     {"username"  , "peach"                  }, 
                     {"icon_emoji", ":princess:"             } 
-                }
-            ); // note that "token" is not needed here it is automatically inserted when using slack::post()
+                } // note that "token" is not needed here 
+            ); // it is automatically inserted when using slack::post()
 ```
 
 Check out the [examples](examples/) for more possibilities.  
@@ -71,14 +71,14 @@ If you need any features feel free to ask or contribute.
 Manage Slacking instance
 ------------------------
 
-There are two approaches to keep alive the *Slacking* session in your program so you can use it anytime, anywhere.
+There are several approaches to keep alive the *Slacking* session in your program so you can use it anytime, anywhere.
 
-_Pass by reference the Slacking object_
+####Pass by reference the Slacking object
 
 The recommended approach is to pass the *Slacking* object by reference, store it when needed and call the wanted methods. 
 You can store it via a [std::reference_wrapper](http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper) as shown in [examples/02-basic.cpp](examples/02-basic.cpp). 
 
-_Use Meyers singleton_
+####Use Meyers singleton
 
 *Slacking* provides free functions `createInstance(const std::string& token)` for initialization and `instance()` for calling the instance. It should not be the recommended way but it is highly convenient (see [examples/01-basic.cpp](examples/01-basic.cpp)). 
 

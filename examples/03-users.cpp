@@ -14,4 +14,3 @@ int main() {
     auto users = slack.users_list_magic();
     std::cout << users << '\n';
 }
-
