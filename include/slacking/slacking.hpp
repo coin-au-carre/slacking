@@ -39,41 +39,27 @@
 namespace slack {
 
 using Json = nlohmann::json;
-
 using zstring   = char *;
 using zwstring  = wchar_t *;
 using czstring  = const char *;
 using cwzstring = const wchar_t * ;
 
+// Free function which looks like python join
+template<typename T>
+std::string join(const std::vector<T>& vec, const std::string sep = "&") {
+    std::stringstream ss;
+    if (vec.size() == 0) { return ""; };
+    ss << vec[0];
+    for (size_t i = 1; i < vec.size(); i ++) { ss << sep << vec[i]; }
+    return ss.str();
+}
+
 // Basic element types. Uses czstring so that it is a POD type.
 struct Element {
     czstring label;
     czstring value;
-    std::string to_string() const { return std::string{label} + '=' + std::string{value}; }
 };
 
-// Free function which looks like python join
-inline
-std::string join(const std::vector<Element>& elements, const std::string sep = "&") {
-    if (elements.size() == 0) return "";
-    auto str = std::string{elements[0].to_string()};
-    for (size_t i = 1; i < elements.size(); i ++) {
-        str += sep + elements[i].to_string();
-    }
-    return str;
-}
-
-
-template<typename T>
-std::string join(const std::vector<T>& vec, const std::string sep = "&") {
-    std::stringstream ss;
-    if (vec.size() == 0) return "";
-    ss << vec[0];
-    for (size_t i = 1; i < vec.size(); i ++) {
-        ss << sep << vec[i];
-    }
-    return ss.str();
-}
 
 // User convenient structure for users.list
 struct User {
@@ -84,24 +70,12 @@ struct User {
     string email;
     string real_name;
     string presence;
-private:
-    friend std::ostream & operator<<(std::ostream &os, const User& user);
 };
 
-inline
-std::ostream & operator<<(std::ostream &os, const User& user) {
-    std::string bot_str = user.is_bot ? "Bot" : "Human";
-    return os << "{ " << join(std::vector<std::string>{user.name, user.real_name, user.email, bot_str, user.presence}, ", ") << " }";
-}
 
-inline
-std::ostream & operator<<(std::ostream &os, const std::vector<User>& users) {
-    os << '[';
-    for(auto const& user : users) {
-        os << "\n  " << user << ',';
-    }
-    return os << "\b\n]";
-}
+std::ostream & operator<<(std::ostream &os, const Element& element);
+std::ostream & operator<<(std::ostream &os, const User& user);
+std::ostream & operator<<(std::ostream &os, const std::vector<User>& users);
 
 class Slacking {
 public:
@@ -201,13 +175,15 @@ private:
         if (json.count("ok")) {
             if(json["ok"].dump() == "true") {
 #if SLACKING_VERBOSE_OUTPUT
-                std::cout <<  method << " [passed]\n";
+                std::cout << "<< " << method << " [passed]\n";
 #endif
             }
             else {
                 if (json.count("error")) {
                     auto reason = json["error"].dump();
-                    std::cerr << "Error! " << method << " call [failed]\nReason: " << reason << std::endl;
+#if SLACKING_VERBOSE_OUTPUT
+                    std::cerr << "<< Error! " << method << " call [failed] Reason given: " << reason << std::endl;
+#endif
                     throw std::runtime_error(reason);
                 }
                 throw std::runtime_error("checkResponse() unknown error.");
@@ -231,6 +207,27 @@ Slacking& createInstance(   const std::string& token,
     static Slacking instance(token,channel,username,icon_emoji);
     return instance;
 }
+
+inline
+std::ostream & operator<<(std::ostream &os, const Element& element) {
+    return os << element.label << '=' << element.value;
+}
+
+inline
+std::ostream & operator<<(std::ostream &os, const User& user) {
+    std::string bot_str = user.is_bot ? "Bot" : "Human";
+    return os << "{ " << join(std::vector<std::string>{user.name, user.real_name, user.email, bot_str, user.presence}, ", ") << " }";
+}
+
+inline
+std::ostream & operator<<(std::ostream &os, const std::vector<User>& users) {
+    os << '[';
+    for(auto const& user : users) {
+        os << "\n  " << user << ',';
+    }
+    return os << "\b\n]";
+}
+
 
 inline
 Slacking& instance() {

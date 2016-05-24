@@ -46,7 +46,7 @@ int main() {
             another_slack_instance.chat_postMessage("this should throw since token is invalid");
         }
         catch(std::exception const& e) {
-            std::cerr << e.what() << '\n';
+            std::cerr << "02-basic failed purposely because of " << e.what() << '\n';
         }
     }
 }
