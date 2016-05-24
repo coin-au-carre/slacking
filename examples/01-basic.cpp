@@ -8,35 +8,39 @@ int main() {
     std::ifstream infile("token.txt");
     std::getline(infile, mytoken);
     {
-        // Create an Slacking instance. All parameters except the first are optional.
-        slack::createInstance(mytoken, "#mychannel", "botname", ":bird:");
+        // Create an Slacking instance. The token must be fill and will be remembered. 
+        slack::create(mytoken);
     }
 
     {
         // Calling API method is easy with some chosen free function 
         slack::apiTest();
         // Or if you prefer you can take back the instance reference and use member function
-        auto& slack_instance = slack::instance();
-        slack_instance.apiTest();
+        auto& slack = slack::instance();
+        slack.apiTest();
         // Helper member and free functions have the same signature
     }
 
     {
-        // Send a message with the parameters given in createInstance
-        slack::chat_postMessage("Hello there!");
+        // Get the instance and fill some permanent chat_postMessage parameters
+        auto& slack = slack::instance();
+        slack.chat_postMessage.channel = "#mychannel"; // required
+        slack.chat_postMessage.username = "botname";   // optional
+        slack.chat_postMessage("Hello there!");
     }
 
     {
-        // You can also use the generic post slack approach. Everything is possible here!
-        slack::post (   
-                        "chat.postMessage",
-                        { 
-                            {"text"      , "Slacking is awesome!"   }, 
-                            {"channel"   , "#mychannel"              }, 
-                            {"username"  , "peach"                  }, 
-                            {"icon_emoji", ":princess:"             } 
-                        }
-                    );
+        // We can also send via helper free function
+        slack::chat_postMessage("Hello there again!");
+        // Note that Slacking remembers the chat_postMessage parameters
+        // Here we just change the username permanently in the instance parameters
+        slack::instance().chat_postMessage.username = "superbot";
+        try {
+            slack::chat_postMessage("Hello there in another chanel!", "#otherchannel");
+        }
+        catch(std::exception const& e) {
+            std::cerr << "channel might not exist: " << e.what() << '\n';
+        }
     }
 
     {
@@ -44,6 +48,5 @@ int main() {
         std::cout << users.dump(2) << '\n'; // will display users list information
     }
 
-    
 }
 

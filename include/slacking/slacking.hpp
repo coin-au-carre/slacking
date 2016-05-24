@@ -64,25 +64,45 @@ struct Element {
 // User convenient structure for users.list
 struct User {
     using string = std::string;
-    User(bool i, string n, string e, string r, string p) : is_bot{i}, name{n}, email{e}, real_name{r}, presence{p} {}
-    bool   is_bot; // someone who left the team is considered as bot? and slackbot is considered as human?
     string name;
     string email;
     string real_name;
     string presence;
+    bool   is_bot; // someone who left the team is considered as bot? and slackbot is considered as human?
+
+    User(bool i, string n, string e, string r, string p) : is_bot{i}, name{n}, email{e}, real_name{r}, presence{p} {}
 };
 
 
-std::ostream & operator<<(std::ostream &os, const Element& element);
-std::ostream & operator<<(std::ostream &os, const User& user);
-std::ostream & operator<<(std::ostream &os, const std::vector<User>& users);
+std::ostream& operator<<(std::ostream &os, const Element& element);
+std::ostream& operator<<(std::ostream &os, const User& user);
+std::ostream& operator<<(std::ostream &os, const std::vector<User>& users);
+
+class Slacking; // forward declaration for magic structures
+
+namespace _detail {
+
+struct Magic_chat_postMessage {
+    std::string channel;    // required
+    std::string username;   // optional
+    std::string icon_emoji; // optional
+
+    Magic_chat_postMessage(Slacking& slack) : slack_{slack} {}
+    Json operator()(const std::string& text, const std::string& specific_channel="");
+    void channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
+        channel = c; username = u; icon_emoji = i;
+    }
+
+private:
+    Slacking& slack_;
+};
+
+} // namespace _detail
 
 class Slacking {
 public:
     Slacking() = delete;
-    Slacking(const std::string& token, const std::string& channel = ""
-        , const std::string& username="Slacking bot", const std::string& icon_emoji="") 
-    : session_{}, token_{token}, channel_{channel}, username_{username}, icon_emoji_{icon_emoji} {
+    Slacking(const std::string& token) : session_{}, token_{token} {
         session_.SetUrl("https://slack.com/api/");
         // session_.SetTimeout(cpr::Timeout{700});
     }
@@ -90,10 +110,7 @@ public:
     Slacking(const Slacking&)            = delete;
     Slacking& operator=(const Slacking&) = delete;
 
-    void set_token(const std::string& token)            { token_ = token; };
-    void set_channel(const std::string& channel)        { channel_ = channel; };
-    void set_username(const std::string& username)      { username_ = username; };
-    void set_icon_emoji(const std::string& icon_emoji)  { icon_emoji_ = icon_emoji; };
+    void reset_token(const std::string& token) { token_ = token; };
 
     //! Post method
     Json post(const std::string& method, const std::string& data = "") {
@@ -125,24 +142,13 @@ public:
         return get(method, join(elements));
     }
 
-    // curl -XPOST "https://slack.com/api/chat.postMessage" -d 'token=???&channel=#thevoid&text=coincoin' 
-    void chat_postMessage(const std::string& text) {
-        auto elements = std::vector<Element>{
-            { "channel", channel_.c_str() }, 
-            { "text", text.c_str() }, 
-            { "username",username_.c_str() },
-            { "icon_emoji",icon_emoji_.c_str() }
-        };
-        auto json = post("chat.postMessage", elements);
-    }
-
     Json users_list(bool presence = true) {
         auto presence_char = presence ? "1" : "0";
         auto json = post("users.list", {{"token", token_.c_str()}, {"presence", presence_char }});
         return json["members"];
     }
 
-    std::vector<User> users_list_magic(bool presence = true) {
+    std::vector<User> magic_users_list(bool presence = true) {
         auto json_members = users_list(true);
         auto users = std::vector<User>{};
         users.reserve(json_members.size());
@@ -157,10 +163,9 @@ public:
     }
 
     void apiTest() { auto json = get("api.test"); } // If no error is thrown then everything is ok
-
+    
     void debug() const { std::cout << token_ << std::endl; }
 
-    
 private:
     void setParameters(const std::string& method, const std::string& data = "") {
         auto complete_url = "https://slack.com/api/" + method;
@@ -191,36 +196,43 @@ private:
         }
     }
 
+public:
+    _detail::Magic_chat_postMessage chat_postMessage{*this};
+
 private:
     cpr::Session    session_;
     std::string     token_;
-    std::string     channel_;
-    std::string     username_;
-    std::string     icon_emoji_;
 };
 
-inline
-Slacking& createInstance(   const std::string& token, 
-                            const std::string& channel = "", 
-                            const std::string& username = "", 
-                            const std::string& icon_emoji = "")  {
-    static Slacking instance(token,channel,username,icon_emoji);
-    return instance;
-}
 
 inline
-std::ostream & operator<<(std::ostream &os, const Element& element) {
+Json _detail::Magic_chat_postMessage::operator()(const std::string& text, const std::string& specific_channel) {
+    auto str_channel = specific_channel.empty() ? channel : specific_channel;
+    if (str_channel.empty()) { throw std::invalid_argument("channel is not set"); }
+    auto elements = std::vector<Element>{
+        { "channel"   , str_channel.c_str()  }, 
+        { "text"      , text.c_str()         }, 
+        { "username"  , username.c_str()     },
+        { "icon_emoji", icon_emoji.c_str()   }
+    };
+    auto json = slack_.post("chat.postMessage", elements);
+    return json;
+}
+
+
+inline
+std::ostream& operator<<(std::ostream &os, const Element& element) {
     return os << element.label << '=' << element.value;
 }
 
 inline
-std::ostream & operator<<(std::ostream &os, const User& user) {
+std::ostream& operator<<(std::ostream &os, const User& user) {
     std::string bot_str = user.is_bot ? "Bot" : "Human";
     return os << "{ " << join(std::vector<std::string>{user.name, user.real_name, user.email, bot_str, user.presence}, ", ") << " }";
 }
 
 inline
-std::ostream & operator<<(std::ostream &os, const std::vector<User>& users) {
+std::ostream& operator<<(std::ostream &os, const std::vector<User>& users) {
     os << '[';
     for(auto const& user : users) {
         os << "\n  " << user << ',';
@@ -228,10 +240,15 @@ std::ostream & operator<<(std::ostream &os, const std::vector<User>& users) {
     return os << "\b\n]";
 }
 
+inline
+Slacking& create(const std::string& token)  {
+    static Slacking instance(token);
+    return instance;
+}
 
 inline
 Slacking& instance() {
-    return createInstance("");
+    return create("");
 }
 
 inline
@@ -240,8 +257,8 @@ void apiTest() {
 }
 
 inline
-void chat_postMessage(const std::string& text) {
-    instance().chat_postMessage(text);
+Json chat_postMessage(const std::string& text, const std::string& specific_channel="") {
+    return instance().chat_postMessage(text, specific_channel);
 }
 
 inline
