@@ -120,7 +120,7 @@ public:
         return post(method, join(elements));
     }
 
-    Json get(const std::string& method, std::vector<Element>&elements) {
+    Json get(const std::string& method, std::vector<Element> elements) {
         elements.emplace_back(Element{"token", token_.c_str()});
         return get(method, join(elements));
     }
@@ -156,7 +156,7 @@ public:
         return users;
     }
 
-    void apiTest() { auto json = get("api.test"); }
+    void apiTest() { auto json = get("api.test"); } // If no error is thrown then everything is ok
 
     void debug() const { std::cout << token_ << std::endl; }
 
