@@ -51,7 +51,7 @@ CPR have been rewritten in order to be a header only library. Hence, you don't h
 Installation
 ------------
 
-Just copy the `include/slacking` header files in your project. That's all.  
+Just copy the `include/slacking` folder in your project. Add `#include "slacking.hpp"` in your project files. That's all.  
 
 
 Ongoing work
@@ -77,19 +77,30 @@ There are several approaches to keep alive the *Slacking* session in your progra
 ####Use Meyers singleton
 
 *Slacking* provides free convenient functions : `slack::create(const std::string& token)` and `slack::instance()`.
-Initialize Slacking with
+Initialize the Slacking instance with:
 ```c++
 auto slack& = slack::create("xxx-xxx-xxx-xxx");
 ```
-When you are in other scope and you don't have the `slack` reference anymore you can have it again with :  
+And when you are in another scope and you have lost the `slack` reference, you can grab it again with :  
 ```c++
 auto slack& = slack::instance();
 ```
-It might not be the recommended way but as you can see, since we generally handle only one instance, it is highly convenient. You can refer to [examples/01-basic.cpp](examples/01-basic.cpp)).
+It might not be the recommended way but since we generally handle only one Slacking instance, it is highly convenient. You can refer to [examples/01-basic.cpp](examples/01-basic.cpp)).
 
 ####Pass by reference (or by pointer)
 
 The recommended approach should be to pass the *Slacking* instance by reference, store it, and call the appropriate methods when needed.
+
+```c++
+void foo(slack::Slacking& slack) {
+    slack.chat_postMessage("I am slacking!", "#random");
+}
+
+int main() {
+    slack::Slacking slack_instance{"xxx-xxx-xxx-xxx"};
+}
+```
+
 You can use a [std::reference_wrapper](http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper) as shown in [examples/02-basic.cpp](examples/02-basic.cpp). This strategy is useful if you want to manage several Slacking instances.
 
 ### Build the examples
