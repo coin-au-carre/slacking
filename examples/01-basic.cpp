@@ -9,7 +9,7 @@ int main() {
     std::getline(infile, mytoken);
     {
         // Create an Slacking instance. The token must be fill and will be remembered. 
-        slack::createInstance(mytoken);
+        slack::create(mytoken);
     }
 
     {

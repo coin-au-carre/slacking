@@ -12,7 +12,7 @@ class Foo {
 public:
     Foo(slack::Slacking& slack) : slack_{slack} {
         slack_.get().chat_postMessage("Foo class ctor"); // parameters given in bar() should be kept
-        // slack_.get().post(...) method is also available as member function
+        // slack_.instance().post(...) method is also available as member function
     }
 }; 
 

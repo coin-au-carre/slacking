@@ -240,14 +240,14 @@ std::ostream& operator<<(std::ostream &os, const std::vector<User>& users) {
 }
 
 inline
-Slacking& createInstance(const std::string& token)  {
+Slacking& create(const std::string& token)  {
     static Slacking instance(token);
     return instance;
 }
 
 inline
 Slacking& instance() {
-    return createInstance("");
+    return create("");
 }
 
 inline

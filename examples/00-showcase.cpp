@@ -4,7 +4,7 @@
 
 int main() {
 
-    auto& slack = slack::createInstance("xxxx-xxxx"); // where "xxx-xxx" is your Slack API token
+    auto& slack = slack::create("xxxx-xxxx"); // where "xxx-xxx" is your Slack API token
     slack.chat_postMessage.channel = "#general";
 
     {

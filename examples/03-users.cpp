@@ -9,7 +9,7 @@ int main() {
     std::getline(infile, mytoken);
 
     // Create an Slacking instance. All parameters except the first are optional.
-    auto& slack = slack::createInstance(mytoken);
+    auto& slack = slack::create(mytoken);
     
     auto users = slack.magic_users_list();
     std::cout << users << '\n';
