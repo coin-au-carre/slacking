@@ -11,7 +11,7 @@ class Foo {
 
 public:
     Foo(slack::Slacking& slack) : slack_{slack} {
-        slack_.get().chat_postMessage("Foo class ctor");
+        slack_.get().chat_postMessage("Foo class ctor"); // parameters given in bar() should be kept
         // slack_.get().post(...) method is also available as member function
     }
 }; 
@@ -20,6 +20,7 @@ public:
 void bar(slack::Slacking& slack) {
     // You can try catch API method if an error occur
     try {
+        slack.chat_postMessage.channel_username_iconemoji("#mychannel", "botname", ":bird:"); // for lazy people
         slack.chat_postMessage("bar() function is called");
     }
     catch(std::exception const& e) {
@@ -35,15 +36,15 @@ int main() {
     std::getline(infile, mytoken);
 
     // Create an Slacking instance. All parameters except the first are optional.
-    slack::Slacking slack_instance{mytoken, "#mychannel", "botname", ":bird:"};
+    slack::Slacking slack_instance{mytoken};
     bar(slack_instance);
     Foo foo{slack_instance};
 
     // You can create other slack instances with different tokens and parameters
     {
-        slack::Slacking another_slack_instance{"xxxx-xxxxxxxxx-xxxx", "#otherchannel", "dumbo", ":elephant:"};
+        slack::Slacking another_slack_instance{"xxxx-xxxxxxxxx-xxxx"};
         try {
-            another_slack_instance.chat_postMessage("this should throw since token is invalid");
+            another_slack_instance.chat_postMessage("this should throw since token is invalid", "#channelisnecessaryhere");
         }
         catch(std::exception const& e) {
             std::cerr << "02-basic failed purposely because of " << e.what() << '\n';

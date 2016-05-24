@@ -11,6 +11,6 @@ int main() {
     // Create an Slacking instance. All parameters except the first are optional.
     auto& slack = slack::createInstance(mytoken);
     
-    auto users = slack.users_list_magic();
+    auto users = slack.magic_users_list();
     std::cout << users << '\n';
 }
