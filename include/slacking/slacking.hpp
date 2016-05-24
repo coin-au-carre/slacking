@@ -64,11 +64,11 @@ struct Element {
 // User convenient structure for users.list
 struct User {
     using string = std::string;
+    bool   is_bot; // someone who left the team is considered as bot? and slackbot is considered as human?
     string name;
     string email;
     string real_name;
     string presence;
-    bool   is_bot; // someone who left the team is considered as bot? and slackbot is considered as human?
 
     User(bool i, string n, string e, string r, string p) : is_bot{i}, name{n}, email{e}, real_name{r}, presence{p} {}
 };
@@ -148,8 +148,8 @@ public:
         return json["members"];
     }
 
-    std::vector<User> magic_users_list(bool presence = true) {
-        auto json_members = users_list(true);
+    std::vector<User> magic_users_list() {
+        auto json_members = users_list();
         auto users = std::vector<User>{};
         users.reserve(json_members.size());
         for (auto member : json_members) {
@@ -163,7 +163,7 @@ public:
     }
 
     void apiTest() { auto json = get("api.test"); } // If no error is thrown then everything is ok
-    
+
     void debug() const { std::cout << token_ << std::endl; }
 
 private:
