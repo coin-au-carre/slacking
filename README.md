@@ -14,7 +14,7 @@ Example usage
 
 You can create a slack instance this way.
 ```c++
-auto& slack = slack::createInstance("xxxx-xxxx"); // where "xxx-xxx" is your Slack API token
+auto& slack = slack::create("xxxx-xxxx"); // where "xxx-xxx" is your Slack API token
 slack.chat_postMessage.channel = "#general"; // set a default channel
 ```
 
@@ -45,8 +45,8 @@ Requirements
 + C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7) and GCC (4.9, 5).
 + [Curl](https://curl.haxx.se/libcurl/) (which you probably already have).
 
-Note: *Slacking* uses [CPR C++ Requests](https://github.com/whoshuu/cpr) and [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project. 
-C++ Requests have been rewritten in order to be a header only library. Hence, you do not have to install anything! 
+Note: *Slacking* uses the awesome [C++ Requests](https://github.com/whoshuu/cpr) (CPR) and [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project. 
+CPR have been rewritten in order to be a header only library. Hence, you do not have to install anything! 
 
 Installation
 ------------
@@ -66,7 +66,7 @@ Following C++ helpers free functions and members methods are available in *Slack
 + [users.list](https://api.slack.com/methods/users.list)
 
 More convenient helpers functions and structures are coming... 
-If you need any features feel free to ask or contribute.
+If you need any features feel free to ask and contribute.
 
 
 Manage Slacking instance
@@ -77,12 +77,12 @@ There are several approaches to keep alive the *Slacking* session in your progra
 ####Pass by reference the Slacking object (or by pointer)
 
 The recommended approach is to pass the *Slacking* object by reference, store it, and call it when needed. 
-You can store it via a [std::reference_wrapper](http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper) as shown in [examples/02-basic.cpp](examples/02-basic.cpp). 
+You can store it via a [std::reference_wrapper](http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper) as shown in [examples/02-basic.cpp](examples/02-basic.cpp). Is is useful is you want to manage several Slacking instances. 
 
 
 ####Use Meyers singleton
 
-*Slacking* provides free functions : `createInstance(const std::string& token)` and `instance()`.
+*Slacking* provides free convenient functions : `slack::create(const std::string& token)` and `slack::instance()`.
 Initialize Slacking with 
 ```c++
 auto slack& = slack::createInstance('xxx-xxx');
@@ -91,7 +91,7 @@ When you are in other scope and you don't have the `slack` reference anymore you
 ```c++
 auto slack& = slack::instance();
 ```
-It might not be the recommended way but as you can see, it is highly convenient (see [examples/01-basic.cpp](examples/01-basic.cpp)). This is what I personnally use. 
+It might not be the recommended way but as you can see, since we generally handle only one instance, it is highly convenient (see [examples/01-basic.cpp](examples/01-basic.cpp)). This is what I personnally use. 
 
 
 ### Build the examples
@@ -102,5 +102,5 @@ cmake .. && make
 examples/[whatever]
 ```
 
-In your project, if you want a verbose output such as shown when running the examples, add the following compilation flag: `-DSLACKING_VERBOSE_OUTPUT=1`.
+In your project, if you want a verbose output like when running the examples, add the following compilation flag: `-DSLACKING_VERBOSE_OUTPUT=1`.
 
