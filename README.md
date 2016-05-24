@@ -14,7 +14,7 @@ Example usage
 
 You can create a slack instance this way.
 ```c++
-auto& slack = slack::create("xxxx-xxxx"); // where "xxx-xxx" is your Slack API token
+auto& slack = slack::create("xxx-xxx-xxx-xxx"); // where "xxx-xxx-xxx-xxx" is your Slack API token
 slack.chat_postMessage.channel = "#general"; // set a default channel
 ```
 
@@ -85,7 +85,7 @@ You can store it via a [std::reference_wrapper](http://en.cppreference.com/w/cpp
 *Slacking* provides free convenient functions : `slack::create(const std::string& token)` and `slack::instance()`.
 Initialize Slacking with 
 ```c++
-auto slack& = slack::createInstance('xxx-xxx');
+auto slack& = slack::create("xxx-xxx-xxx-xxx");
 ```
 When you are in other scope and you don't have the `slack` reference anymore you can have it again with :  
 ```c++
