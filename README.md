@@ -15,15 +15,15 @@ Example usage
 You can create a slack instance this way.
 ```c++
 auto& slack = slack::createInstance("xxxx-xxxx"); // where "xxx-xxx" is your Slack API token
-slack.chat_postMessage.channel = "#general";
+slack.chat_postMessage.channel = "#general"; // set a default channel
 ```
 
-Calling Slack API method is easy
+Sending a message is easy
 ```c++
-slack::chat_postMessage("Hello there!"); // will send the message "Hello there!" in the channel #general
+slack::chat_postMessage("Hello there!"); // will send the message "Hello there!" in the channel #general with the registered token
 ```
 
-If you need top flexibility, then you can use the generic functions `slack::post` or `slack::get`.  
+If you need maximum control, you can use the generic functions `slack::post` or `slack::get`.  
 Everything available in [Web Slack API](https://api.slack.com/methods) is possible from here. 
 ```c++
 slack::post (   
@@ -33,7 +33,7 @@ slack::post (
                     {"channel"   , "#mychannel"             }, 
                     {"username"  , "peach"                  }, 
                     {"icon_emoji", ":princess:"             } 
-                } // note that "token" is not needed here 
+                } // note that "token" is not needed here and is the only "registred" parameter
             ); // it is automatically inserted when using slack::post()
 ```
 
