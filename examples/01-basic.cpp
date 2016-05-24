@@ -8,7 +8,7 @@ int main() {
     std::ifstream infile("token.txt");
     std::getline(infile, mytoken);
     {
-        // Create an Slacking instance. The token is compulsory to fill and will be remembered. 
+        // Create an Slacking instance. The token must be fill and will be remembered. 
         slack::createInstance(mytoken);
     }
 
@@ -22,7 +22,7 @@ int main() {
     }
 
     {
-        // Get the instance and fill some chat_postMessage parameters
+        // Get the instance and fill some permanent chat_postMessage parameters
         auto& slack = slack::instance();
         slack.chat_postMessage.channel = "#mychannel"; // required
         slack.chat_postMessage.username = "botname";   // optional
@@ -32,27 +32,15 @@ int main() {
     {
         // We can also send via helper free function
         slack::chat_postMessage("Hello there again!");
+        // Note that Slacking remembers the chat_postMessage parameters
+        // Here we just change the username permanently in the instance parameters
+        slack::instance().chat_postMessage.username = "superbot";
         try {
             slack::chat_postMessage("Hello there in another chanel!", "#otherchannel");
         }
         catch(std::exception const& e) {
             std::cerr << "channel might not exist: " << e.what() << '\n';
         }
-        // Note that Slacking remembers the chat_postMessage parameters
-    }
-
-    {
-        // You can also use the generic post slack approach. Parameters (except the token) will not be taken into account.
-        // Everything from the Web Slack API is possible here!
-        slack::post (   
-                        "chat.postMessage",
-                        { 
-                            {"text"      , "Slacking is awesome!"   }, 
-                            {"channel"   , "#mychannel"              }, 
-                            {"username"  , "peach"                  }, 
-                            {"icon_emoji", ":princess:"             } 
-                        }
-                    );
     }
 
     {

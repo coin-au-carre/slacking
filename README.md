@@ -14,12 +14,13 @@ Example usage
 
 You can create a slack instance this way.
 ```c++
-slack::createInstance("mytoken", "#mychannel", "botname", ":bird:"); // all parameters are optional except the first one (token).
+auto& slack = slack::createInstance("xxxx-xxxx"); // where "xxx-xxx" is your Slack API token
+slack.chat_postMessage.channel = "#general";
 ```
 
 Calling Slack API method is easy
 ```c++
-slack::chat_postMessage("Hello there!"); // will send the message "Hello there!" as user "botname" in the channel #mychannel with the avatar :bird:
+slack::chat_postMessage("Hello there!"); // will send the message "Hello there!" in the channel #general
 ```
 
 If you need top flexibility, then you can use the generic functions `slack::post` or `slack::get`.  
@@ -73,14 +74,24 @@ Manage Slacking instance
 
 There are several approaches to keep alive the *Slacking* session in your program so you can use it anytime, anywhere.
 
-####Pass by reference the Slacking object
+####Pass by reference the Slacking object (or by pointer)
 
-The recommended approach is to pass the *Slacking* object by reference, store it when needed and call the wanted methods. 
+The recommended approach is to pass the *Slacking* object by reference, store it, and call it when needed. 
 You can store it via a [std::reference_wrapper](http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper) as shown in [examples/02-basic.cpp](examples/02-basic.cpp). 
+
 
 ####Use Meyers singleton
 
-*Slacking* provides free functions `createInstance(const std::string& token)` for initialization and `instance()` for calling the instance. It should not be the recommended way but it is highly convenient (see [examples/01-basic.cpp](examples/01-basic.cpp)). 
+*Slacking* provides free functions : `createInstance(const std::string& token)` and `instance()`.
+Initialize Slacking with 
+```c++
+auto slack& = slack::createInstance('xxx-xxx');
+```
+When you are in other scope and you don't have the `slack` reference anymore you can have it again with :  
+```c++
+auto slack& = slack::instance();
+```
+It might not be the recommended way but as you can see, it is highly convenient (see [examples/01-basic.cpp](examples/01-basic.cpp)). This is what I personnally use. 
 
 
 ### Build the examples
@@ -88,8 +99,7 @@ You can store it via a [std::reference_wrapper](http://en.cppreference.com/w/cpp
 ```
 mkdir build && cd build
 cmake .. && make
-examples/01-basic
-examples/02-basic
+examples/[whatever]
 ```
 
 In your project, if you want a verbose output such as shown when running the examples, add the following compilation flag: `-DSLACKING_VERBOSE_OUTPUT=1`.

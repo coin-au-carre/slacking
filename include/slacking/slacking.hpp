@@ -88,7 +88,7 @@ struct Magic_chat_postMessage {
     std::string icon_emoji; // optional
 
     Magic_chat_postMessage(Slacking& slack) : slack_{slack} {}
-    void operator()(const std::string& text, const std::string& specific_channel="");
+    Json operator()(const std::string& text, const std::string& specific_channel="");
     void channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
         channel = c; username = u; icon_emoji = i;
     }
@@ -205,16 +205,17 @@ private:
 
 
 inline
-void _detail::Magic_chat_postMessage::operator()(const std::string& text, const std::string& specific_channel) {
+Json _detail::Magic_chat_postMessage::operator()(const std::string& text, const std::string& specific_channel) {
     auto str_channel = specific_channel.empty() ? channel : specific_channel;
     if (str_channel.empty()) { throw std::invalid_argument("channel is not set"); }
     auto elements = std::vector<Element>{
-        { "channel", str_channel.c_str() }, 
-        { "text", text.c_str() }, 
-        { "username",username.c_str() },
-        { "icon_emoji",icon_emoji.c_str() }
+        { "channel"   , str_channel.c_str()  }, 
+        { "text"      , text.c_str()         }, 
+        { "username"  , username.c_str()     },
+        { "icon_emoji", icon_emoji.c_str()   }
     };
     auto json = slack_.post("chat.postMessage", elements);
+    return json;
 }
 
 
@@ -239,7 +240,7 @@ std::ostream& operator<<(std::ostream &os, const std::vector<User>& users) {
 }
 
 inline
-Slacking& createInstance(   const std::string& token)  {
+Slacking& createInstance(const std::string& token)  {
     static Slacking instance(token);
     return instance;
 }
@@ -255,8 +256,8 @@ void apiTest() {
 }
 
 inline
-void chat_postMessage(const std::string& text, const std::string& specific_channel="") {
-    instance().chat_postMessage(text, specific_channel);
+Json chat_postMessage(const std::string& text, const std::string& specific_channel="") {
+    return instance().chat_postMessage(text, specific_channel);
 }
 
 inline

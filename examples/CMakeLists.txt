@@ -7,12 +7,14 @@ include_directories(${CURL_INCLUDE_DIRS})
 include_directories(".")
 
 set (SOURCES_EXAMPLES 
+    00-showcase.cpp
     01-basic.cpp
     02-basic.cpp
     03-users.cpp
 )
 
 set (TARGETS_EXAMPLES
+    00-showcase
     01-basic
     02-basic
     03-users
