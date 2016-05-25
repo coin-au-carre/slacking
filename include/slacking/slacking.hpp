@@ -70,6 +70,8 @@ std::ostream& operator<<(std::ostream &os, const std::vector<User>& users);
 
 class Slacking; // forward declaration for magic structures
 
+template<class T> void ignore_unused_parameter( const T& ) {}
+
 template<typename T>
 std::string join(const std::vector<T>& vec, const std::string sep = "&");
 
@@ -78,9 +80,10 @@ void replace_all(std::string& str, const std::string& from, const std::string& t
 void replace_slack_escape_characters(std::string& str);
 
 struct Magic_chat_postMessage {
-    std::string channel;    // required
-    std::string username;   // optional
-    std::string icon_emoji; // optional
+    std::string channel{};    // required
+    std::string username{};   // optional
+    std::string icon_emoji{}; // optional
+    std::string parse{};      // optional defaults to none
 
     Magic_chat_postMessage(Slacking& slack) : slack_{slack} {}
     Json operator()(std::string text, const std::string& specified_channel="");
@@ -170,6 +173,7 @@ private:
     }
 
     void checkResponse(const std::string& method, const Json& json) {
+        ignore_unused_parameter(method);
         if (json.count("ok")) {
             if(json["ok"].dump() == "true") {
 #if SLACKING_VERBOSE_OUTPUT
@@ -210,8 +214,7 @@ std::string join(const std::vector<T>& vec, const std::string sep) {
 
 inline
 void replace_all(std::string& str, const std::string& from, const std::string& to) {
-    if(from.empty())
-        return;
+    if(from.empty()) { return; }
     size_t start_pos = 0;
     while((start_pos = str.find(from, start_pos)) != std::string::npos) {
         str.replace(start_pos, from.length(), to);
@@ -233,10 +236,11 @@ Json Magic_chat_postMessage::operator()(std::string text, const std::string& spe
     if (str_channel.empty()) { throw std::invalid_argument("channel is not set"); }
     // replace_slack_escape_characters(text); // we don't seem to have to replace these characters nor URL encode CPR does it for us
     auto elements = std::vector<Element>{
-        { "channel"   , str_channel.c_str()  }, 
-        { "text"      , text.c_str()         }, 
-        { "username"  , username.c_str()     },
-        { "icon_emoji", icon_emoji.c_str()   }
+        { "channel"   , str_channel.c_str() }, 
+        { "text"      , text.c_str()        }, 
+        { "username"  , username.c_str()    },
+        { "icon_emoji", icon_emoji.c_str()  },
+        { "parse"     , parse.c_str()       }
     };
     auto json = slack_.post("chat.postMessage", elements);
     return json;

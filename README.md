@@ -3,8 +3,8 @@ Slacking
 
 [![Build Status](https://travis-ci.org/coin-au-carre/slacking.svg?branch=master)](https://travis-ci.org/coin-au-carre/slacking)
 
-Modern C++ people also uses Slack !
------------------------------------
+Modern C++ people also loves Slack !
+------------------------------------
 
 *Slacking* is a lightweight **C++11 header only library** for communicating with the [Slack Web API](https://api.slack.com/web).  
 *Slacking* aims to be easy to use. *Slacking* requires to have an [API token](https://api.slack.com/docs/oauth-test-tokens).
