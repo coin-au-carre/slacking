@@ -108,7 +108,6 @@ public:
 
     void reset_token(const std::string& token) { token_ = token; };
 
-    //! Post method
     Json post(const std::string& method, const std::string& data = "") {
         setParameters(method, data);
         auto response = session_.Post();
@@ -118,7 +117,6 @@ public:
         return json;
     }
 
-    //! Get method
     Json get(const std::string& method, const std::string& data = "") {
         setParameters(method, data);
         auto response = session_.Get();
@@ -267,33 +265,38 @@ std::ostream& operator<<(std::ostream &os, const std::vector<User>& users) {
     return os << "\b\n]";
 }
 
-
+inline
 Slacking& create(const std::string& token)  {
     static Slacking instance(token);
     return instance;
 }
 
+inline
 Slacking& instance() {
     return create("");
 }
 
+inline
 void api_test() {
     instance().api_test();
 }
 
-
+inline
 Json chat_postMessage(std::string text, const std::string& specified_channel="") {
     return instance().chat_postMessage(text, specified_channel);
 }
 
+inline
 Json users_list(bool presence = true) {
     return instance().users_list(presence);
 }
 
+inline
 void post(const std::string& method, std::vector<Element> elements) {
     instance().post(method, elements);
 }
 
+inline
 void get(const std::string& method, std::vector<Element> elements) {
     instance().get(method, elements);
 }
