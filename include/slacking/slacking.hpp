@@ -38,28 +38,19 @@
 
 namespace slack {
 
+namespace _detail {
+
 using Json = nlohmann::json;
 using zstring   = char *;
 using zwstring  = wchar_t *;
 using czstring  = const char *;
 using cwzstring = const wchar_t * ;
 
-// Free function which looks like python join
-template<typename T>
-std::string join(const std::vector<T>& vec, const std::string sep = "&") {
-    std::stringstream ss;
-    if (vec.size() == 0) { return ""; };
-    ss << vec[0];
-    for (size_t i = 1; i < vec.size(); i ++) { ss << sep << vec[i]; }
-    return ss.str();
-}
-
 // Basic element types. Uses czstring so that it is a POD type.
 struct Element {
     czstring label;
     czstring value;
 };
-
 
 // User convenient structure for users.list
 struct User {
@@ -73,14 +64,18 @@ struct User {
     User(bool i, string n, string e, string r, string p) : is_bot{i}, name{n}, email{e}, real_name{r}, presence{p} {}
 };
 
-
 std::ostream& operator<<(std::ostream &os, const Element& element);
 std::ostream& operator<<(std::ostream &os, const User& user);
 std::ostream& operator<<(std::ostream &os, const std::vector<User>& users);
 
 class Slacking; // forward declaration for magic structures
 
-namespace _detail {
+template<typename T>
+std::string join(const std::vector<T>& vec, const std::string sep = "&");
+
+void replace_all(std::string& str, const std::string& from, const std::string& to);
+
+void replace_slack_escape_characters(std::string& str);
 
 struct Magic_chat_postMessage {
     std::string channel;    // required
@@ -88,7 +83,7 @@ struct Magic_chat_postMessage {
     std::string icon_emoji; // optional
 
     Magic_chat_postMessage(Slacking& slack) : slack_{slack} {}
-    Json operator()(const std::string& text, const std::string& specific_channel="");
+    Json operator()(std::string text, const std::string& specified_channel="");
     void channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
         channel = c; username = u; icon_emoji = i;
     }
@@ -96,8 +91,6 @@ struct Magic_chat_postMessage {
 private:
     Slacking& slack_;
 };
-
-} // namespace _detail
 
 class Slacking {
 public:
@@ -162,7 +155,7 @@ public:
         return users;
     }
 
-    void apiTest() { auto json = get("api.test"); } // If no error is thrown then everything is ok
+    void api_test() { auto json = get("api.test"); } // If no error is thrown then everything is ok
 
     void debug() const { std::cout << token_ << std::endl; }
 
@@ -197,18 +190,48 @@ private:
     }
 
 public:
-    _detail::Magic_chat_postMessage chat_postMessage{*this};
+    Magic_chat_postMessage chat_postMessage{*this};
 
 private:
     cpr::Session    session_;
     std::string     token_;
 };
 
+// Free function which looks like python join
+template<typename T>
+inline
+std::string join(const std::vector<T>& vec, const std::string sep) {
+    std::stringstream ss;
+    if (vec.size() == 0) { return ""; };
+    ss << vec[0];
+    for (size_t i = 1; i < vec.size(); i ++) { ss << sep << vec[i]; }
+    return ss.str();
+}
 
 inline
-Json _detail::Magic_chat_postMessage::operator()(const std::string& text, const std::string& specific_channel) {
-    auto str_channel = specific_channel.empty() ? channel : specific_channel;
+void replace_all(std::string& str, const std::string& from, const std::string& to) {
+    if(from.empty())
+        return;
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length();
+    }
+}
+
+// https://api.slack.com/docs/formatting
+inline
+void replace_slack_escape_characters(std::string& str) {
+    replace_all(str, "&", "&amp;");
+    replace_all(str, "<", "&lt;");
+    replace_all(str, ">", "&gt;");
+}
+
+inline
+Json Magic_chat_postMessage::operator()(std::string text, const std::string& specified_channel) {
+    auto str_channel = specified_channel.empty() ? channel : specified_channel;
     if (str_channel.empty()) { throw std::invalid_argument("channel is not set"); }
+    // replace_slack_escape_characters(text); // we don't seem to have to replace these characters nor URL encode CPR does it for us
     auto elements = std::vector<Element>{
         { "channel"   , str_channel.c_str()  }, 
         { "text"      , text.c_str()         }, 
@@ -240,36 +263,49 @@ std::ostream& operator<<(std::ostream &os, const std::vector<User>& users) {
     return os << "\b\n]";
 }
 
-inline
+
 Slacking& create(const std::string& token)  {
     static Slacking instance(token);
     return instance;
 }
 
-inline
 Slacking& instance() {
     return create("");
 }
 
-inline
-void apiTest() {
-    instance().apiTest();
+void api_test() {
+    instance().api_test();
 }
 
-inline
-Json chat_postMessage(const std::string& text, const std::string& specific_channel="") {
-    return instance().chat_postMessage(text, specific_channel);
+
+Json chat_postMessage(std::string text, const std::string& specified_channel="") {
+    return instance().chat_postMessage(text, specified_channel);
 }
 
-inline
 Json users_list(bool presence = true) {
     return instance().users_list(presence);
 }
 
-inline
 void post(const std::string& method, std::vector<Element> elements) {
     instance().post(method, elements);
 }
+
+void get(const std::string& method, std::vector<Element> elements) {
+    instance().get(method, elements);
+}
+
+} // namespace _detail
+
+// Public interface
+using _detail::Slacking;
+using _detail::create;
+using _detail::instance;
+using _detail::api_test;
+using _detail::chat_postMessage;
+using _detail::users_list;
+using _detail::post;
+using _detail::get;
+using _detail::operator<<;
 
 } // namespace slack
 

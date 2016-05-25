@@ -85,11 +85,11 @@ And when you are in another scope and you have lost the `slack` reference, you c
 ```c++
 auto slack& = slack::instance();
 ```
-It might not be the recommended way but since we generally handle only one Slacking instance, it is highly convenient. You can refer to the example usage and  [examples/01-basic.cpp](examples/01-basic.cpp)).
+It might not be the recommended way but since we generally want to handle only Slack instance (one handle), it is highly convenient. You can refer to the example usage and  [examples/01-basic.cpp](examples/01-basic.cpp).
 
 ####Pass by reference (or by pointer)
 
-The recommended approach should be to pass the *Slacking* instance by reference, store it, and call the appropriate methods when needed.
+An other approach is to pass the *Slacking* instance by reference, store it, and call the appropriate methods when needed.
 
 ```c++
 void foo(slack::Slacking& slack) {
@@ -102,7 +102,7 @@ int main() {
 }
 ```
 
-You can use a [std::reference_wrapper](http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper) as shown in [examples/02-basic.cpp](examples/02-basic.cpp). This strategy is useful if you want to manage several Slacking instances.
+You can use a [std::reference_wrapper](http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper) as shown in [examples/02-basic.cpp](examples/02-basic.cpp). This strategy is useful if you have to manage several Slacking instances.
 
 ### Build the examples
 
@@ -112,4 +112,5 @@ cmake .. && make
 examples/[whatever]
 ```
 
-In your project, if you want a verbose output like when running the examples, add the following compilation flag: `-DSLACKING_VERBOSE_OUTPUT=1`.
+In your project, if you want a verbose output like when running the examples, add the following compilation flag:  
+`-DSLACKING_VERBOSE_OUTPUT=1`.

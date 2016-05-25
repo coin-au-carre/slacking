@@ -14,10 +14,10 @@ int main() {
 
     {
         // Calling API method is easy with some chosen free function 
-        slack::apiTest();
+        slack::api_test();
         // Or if you prefer you can take back the instance reference and use member function
         auto& slack = slack::instance();
-        slack.apiTest();
+        slack.api_test();
         // Helper member and free functions have the same signature
     }
 
@@ -26,12 +26,12 @@ int main() {
         auto& slack = slack::instance();
         slack.chat_postMessage.channel = "#mychannel"; // required
         slack.chat_postMessage.username = "botname";   // optional
-        slack.chat_postMessage("Hello there!");
+        slack.chat_postMessage("Hello there! Visit https://api.slack.com !");
     }
 
     {
         // We can also send via helper free function
-        slack::chat_postMessage("Hello there again!");
+        slack::chat_postMessage("Hello there again! Join <#C024BE7LR|general>!");
         // Note that Slacking remembers the chat_postMessage parameters
         // Here we just change the username permanently in the instance parameters
         slack::instance().chat_postMessage.username = "superbot";
