@@ -8,9 +8,12 @@ int main() {
     std::ifstream infile("token.txt");
     std::getline(infile, mytoken);
 
-    // Create an Slacking instance. All parameters except the first are optional.
     auto& slack = slack::create(mytoken);
     
+    // You can display all the JSON response
+    std::cout << slack.users_list() << std::endl; 
+
+    // You can 
     auto users = slack.magic_users_list();
     std::cout << users << '\n';
 }

@@ -46,54 +46,66 @@ using zwstring  = wchar_t *;
 using czstring  = const char *;
 using cwzstring = const wchar_t * ;
 
-// Basic element types. Uses czstring so that it is a POD type.
+// forward declaration for magic structures
+class Slacking; 
+struct Element;
+
+// using Attachment = std::vector<Element>;
+
+// Magic structure for chat.postMessage every public data members can be manually filled.
+struct Magic_chat_postMessage {
+    std::string channel{};    // required
+    std::string username{};   // optional
+    std::string icon_emoji{}; // optional
+    std::string parse{};      // optional defaults to none
+    std::string attachments{}; // optional 
+
+    void channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
+        channel = c; username = u; icon_emoji = i;
+    }
+
+    Json operator()(std::string text=" ", const std::string& specified_channel="");
+    Magic_chat_postMessage(Slacking& slack) : slack_{slack} {}
+private:
+    Slacking& slack_;
+};
+
+
+// Basic element types. Uses czstring so that it is a POD.
 struct Element {
     czstring label;
     czstring value;
+    bool empty() const { return value && !value[0]; }
 };
 
 // User convenient structure for users.list
 struct User {
-    using string = std::string;
     bool   is_bot; // someone who left the team is considered as bot? and slackbot is considered as human?
-    string name;
-    string email;
-    string real_name;
-    string presence;
+    std::string name;
+    std::string email;
+    std::string real_name;
+    std::string presence;
 
-    User(bool i, string n, string e, string r, string p) : is_bot{i}, name{n}, email{e}, real_name{r}, presence{p} {}
+    User(bool i, std::string n, std::string e, std::string r, std::string p) 
+        : is_bot{i}, name{n}, email{e}, real_name{r}, presence{p} {}
 };
 
 std::ostream& operator<<(std::ostream &os, const Element& element);
 std::ostream& operator<<(std::ostream &os, const User& user);
 std::ostream& operator<<(std::ostream &os, const std::vector<User>& users);
 
-class Slacking; // forward declaration for magic structures
-
 template<class T> void ignore_unused_parameter( const T& ) {}
 
 template<typename T>
 std::string join(const std::vector<T>& vec, const std::string sep = "&");
 
+template<typename T>
+std::string join_non_empty(const std::vector<T>& vec, const std::string sep = "&");
+
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 
 void replace_slack_escape_characters(std::string& str);
 
-struct Magic_chat_postMessage {
-    std::string channel{};    // required
-    std::string username{};   // optional
-    std::string icon_emoji{}; // optional
-    std::string parse{};      // optional defaults to none
-
-    Magic_chat_postMessage(Slacking& slack) : slack_{slack} {}
-    Json operator()(std::string text, const std::string& specified_channel="");
-    void channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
-        channel = c; username = u; icon_emoji = i;
-    }
-
-private:
-    Slacking& slack_;
-};
 
 class Slacking {
 public:
@@ -210,6 +222,20 @@ std::string join(const std::vector<T>& vec, const std::string sep) {
     return ss.str();
 }
 
+template<typename T>
+inline
+std::string join_non_empty(const std::vector<T>& vec, const std::string sep) {
+    std::stringstream ss;
+    if (vec.size() == 0) { return ""; };
+    ss << vec[0];
+    for (size_t i = 1; i < vec.size(); i ++) { 
+        if (!vec[i].empty()) {
+            ss << sep << vec[i];
+        } 
+    }
+    return ss.str();
+}
+
 inline
 void replace_all(std::string& str, const std::string& from, const std::string& to) {
     if(from.empty()) { return; }
@@ -232,13 +258,25 @@ inline
 Json Magic_chat_postMessage::operator()(std::string text, const std::string& specified_channel) {
     auto str_channel = specified_channel.empty() ? channel : specified_channel;
     if (str_channel.empty()) { throw std::invalid_argument("channel is not set"); }
-    // replace_slack_escape_characters(text); // we don't seem to have to replace these characters nor URL encode CPR does it for us
+    // replace_slack_escape_characters(text); // No need CPR does the work and supports Url encoded POST values
+    // auto str_attachments = std::string{};
+    // if (attachments.size() > 0) {
+    //     str_attachments += '[';
+    //     for (auto const& attachment : attachments) {
+    //         str_attachments += '{' + join(attachment, ",");
+    //         str_attachments.pop_back(); // remove last comma
+    //         str_attachments += "},";
+    //     }
+    //     str_attachments.pop_back(); // remove last comma
+    //     str_attachments += ']';
+    // }
     auto elements = std::vector<Element>{
-        { "channel"   , str_channel.c_str() }, 
-        { "text"      , text.c_str()        }, 
-        { "username"  , username.c_str()    },
-        { "icon_emoji", icon_emoji.c_str()  },
-        { "parse"     , parse.c_str()       }
+        { "text"      , text.c_str()         }, 
+        { "channel"   , str_channel.c_str()  }, 
+        { "username"  , username.c_str()     },
+        { "icon_emoji", icon_emoji.c_str()   },
+        { "parse"     , parse.c_str()        },
+        { "attachments", attachments.c_str() }
     };
     auto json = slack_.post("chat.postMessage", elements);
     return json;
@@ -282,7 +320,7 @@ void api_test() {
 }
 
 inline
-Json chat_postMessage(std::string text, const std::string& specified_channel="") {
+Json chat_postMessage(std::string text=" ", const std::string& specified_channel="") {
     return instance().chat_postMessage(text, specified_channel);
 }
 
@@ -304,11 +342,13 @@ void get(const std::string& method, std::vector<Element> elements) {
 } // namespace _detail
 
 // Public interface
+using _detail::chat_postMessage;
+// using _detail::Attachment;
+
 using _detail::Slacking;
 using _detail::create;
 using _detail::instance;
 using _detail::api_test;
-using _detail::chat_postMessage;
 using _detail::users_list;
 using _detail::post;
 using _detail::get;

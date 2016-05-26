@@ -35,7 +35,7 @@ int main() {
     std::ifstream infile("token.txt");
     std::getline(infile, mytoken);
 
-    // Create an Slacking instance. All parameters except the first are optional.
+    // Create slack instance
     slack::Slacking slack_instance{mytoken};
     bar(slack_instance);
     Foo foo{slack_instance};
