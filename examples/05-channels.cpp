@@ -22,6 +22,7 @@ int main() {
         std::cout << channel.name << std::endl;
     }
 
+    // Get precise informations on a specific channel
     auto channel_id = channels[0].id;
     std::cout << slack::channels_info(channel_id) << std::endl;
 }

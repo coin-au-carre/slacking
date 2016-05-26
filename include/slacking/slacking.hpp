@@ -172,7 +172,7 @@ public:
         users.reserve(json_members.size());
         for (auto member : json_members) {
             auto presence = member.count("presence") ? member["presence"] : "";
-            auto email = member["profile"].count("email") ? member["profile"]["email"] : "";
+            auto email = member["profile"].count("email") ? member["profile"]["email"].dump() : ""; // dump here because email can be null
             bool is_bot = true;
             if (member["is_bot"].is_boolean()) { is_bot = member["is_bot"]; }
             users.push_back(User{member["id"], member["name"], email, member["profile"]["real_name"], presence, is_bot});
@@ -205,7 +205,6 @@ public:
         auto json = post("channels.info", {{"channel", channel_id.c_str()}});
         return json["channel"];
     }
-
 
     void api_test() { auto json = get("api.test"); } // If no error is thrown then everything is ok
 
@@ -402,15 +401,17 @@ void get(const std::string& method, std::vector<Element> elements) {
 } // namespace _detail
 
 // Public interface
-using _detail::chat_postMessage;
-// using _detail::Attachment;
-
 using _detail::Slacking;
 
 using _detail::create;
 using _detail::instance;
 
+using _detail::post;
+using _detail::get;
+using _detail::operator<<;
+
 using _detail::api_test;
+using _detail::chat_postMessage;
 using _detail::users_list;
 using _detail::magic_users_list;
 using _detail::users_info;
@@ -418,9 +419,6 @@ using _detail::channels_list;
 using _detail::magic_channels_list;
 using _detail::channels_info;
 
-using _detail::post;
-using _detail::get;
-using _detail::operator<<;
 
 } // namespace slack
 

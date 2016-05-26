@@ -10,8 +10,8 @@ set (SOURCES_EXAMPLES
     00-showcase.cpp
     01-basic.cpp
     02-basic.cpp
-    03-users.cpp
-    04-attachments.cpp
+    03-attachments.cpp
+    04-users.cpp
     05-channels.cpp
 )
 
@@ -19,8 +19,8 @@ set (TARGETS_EXAMPLES
     00-showcase
     01-basic
     02-basic
-    03-users
-    04-attachments
+    03-attachments
+    04-users
     05-channels
 )
 
