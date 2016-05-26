@@ -64,7 +64,6 @@ slack::set_attachments(json_attachments);
 std::cout << slack::chat_postMessage() << std::endl;
 ```
 
-You will see in Slack the following: 
 [![Slacking attachments](doc/showcase_attachments.png?raw=true "Slacking attachments")](https://www.youtube.com/watch?v=ND-TuW0KIgg)
 
 The output will give a JSON response sent back by Slack:
@@ -84,7 +83,7 @@ CPR have been rewritten in order to be a header only library. Hence, you don't h
 Installation
 ------------
 
-Just copy the `include/slacking` folder in your project. Add `#include "slacking.hpp"` in your project files. That's all.  
+Just copy the `include/slacking` folder in your project and add `#include "slacking.hpp"`. That's all.  
 
 
 Ongoing work
