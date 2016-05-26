@@ -56,7 +56,7 @@ struct Magic_chat_postMessage {
     std::string username{};   // optional
     std::string icon_emoji{}; // optional
     std::string parse{};      // optional defaults to none
-    std::string attachments{}; // optional 
+    std::string attachments{}; // optional should be reset when functor is called
 
     void channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
         channel = c; username = u; icon_emoji = i;
@@ -64,6 +64,7 @@ struct Magic_chat_postMessage {
 
     Json operator()(std::string text=" ", const std::string& specified_channel="");
     Magic_chat_postMessage(Slacking& slack) : slack_{slack} {}
+
 private:
     Slacking& slack_;
 };
@@ -75,7 +76,7 @@ struct User {
     std::string email;
     std::string real_name;
     std::string presence;
-    bool   is_bot; // someone who left the team is considered as bot? and slackbot is considered as human?
+    bool is_bot; // someone who left the team is considered as bot? and slackbot is considered as human?
 
     User(const std::string& i, const std::string& n, const std::string& e, const std::string& r, const std::string& p, bool bot) 
         : id{i}, name{n}, email{e}, real_name{r}, presence{p}, is_bot{bot} {}
@@ -306,6 +307,7 @@ Json Magic_chat_postMessage::operator()(std::string text, const std::string& spe
         { "attachments", attachments.c_str() }
     };
     auto json = slack_.post("chat.postMessage", elements);
+    attachments = std::string{}; // reset
     return json;
 }
 
@@ -357,6 +359,17 @@ inline
 Json chat_postMessage(std::string text=" ", const std::string& specified_channel="") {
     return instance().chat_postMessage(text, specified_channel);
 }
+
+inline
+void channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
+    return instance().chat_postMessage.channel_username_iconemoji(c,u,i);
+}
+
+inline
+void set_attachments(const Json& json) {
+    instance().chat_postMessage.attachments = json.dump();
+}
+
 
 inline
 Json users_list(bool presence = true) {
@@ -411,10 +424,15 @@ using _detail::get;
 using _detail::operator<<;
 
 using _detail::api_test;
+
 using _detail::chat_postMessage;
+using _detail::channel_username_iconemoji;
+using _detail::set_attachments;
+
 using _detail::users_list;
 using _detail::magic_users_list;
 using _detail::users_info;
+
 using _detail::channels_list;
 using _detail::magic_channels_list;
 using _detail::channels_info;

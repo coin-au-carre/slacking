@@ -46,7 +46,7 @@ A more elaborated example
 You can make richly-formmated messages with [attachments](https://api.slack.com/docs/attachments).
 
 ```c++
-slack::instance().chat_postMessage.channel_username_iconemoji("#mychannel", "Support Bot", ":hamster:");
+slack::channel_username_iconemoji("#ticker-channel", "Support Bot", ":hamster:");
 
 auto json_attachments = R"([
     {
@@ -60,13 +60,12 @@ auto json_attachments = R"([
     }
 ])"_json;
 
-slack::instance().chat_postMessage.attachments = json_attachments.dump();
+slack::set_attachments(json_attachments);
 std::cout << slack::chat_postMessage() << std::endl;
 ```
 
 You will see in Slack the following: 
-<!-- ![Slacking attachments](https://raw.githubusercontent.com/coin-au-carre/slacking/master/doc/showcase_attachments.png) -->
-![Slacking attachments](doc/showcase_attachments.png?raw=true "Slacking attachments")
+[![Slacking attachments](doc/showcase_attachments.png?raw=true "Slacking attachments")](https://www.youtube.com/watch?v=ND-TuW0KIgg)
 
 The output will give a JSON response sent back by Slack:
 ```
@@ -96,8 +95,8 @@ You can use the `slack::post` or `slack::get` methods to fully exploit the [Slac
 Following C++ helpers free functions and members methods are available in *Slacking* for convenience :
 
 + [api.test](https://api.slack.com/methods/api.test) (see [examples/01-basic.cpp](examples/01-basic.cpp))
-+ [chat.postMessage](https://api.slack.com/methods/chat.postMessage) (see [examples/00-showcase.cpp](examples/00-showcase.cpp), [examples/01-basic.cpp](examples/01-basic.cpp), [examples/02-basic.cpp](examples/02-basic.cpp), [examples/03-attachments.cpp](examples/04-attachments.cpp))
-+ [users.list](https://api.slack.com/methods/users.list), [users.info](https://api.slack.com/methods/users.info) (see [examples/04-users.cpp](examples/03-users.cpp))
++ [chat.postMessage](https://api.slack.com/methods/chat.postMessage) (see [examples/00-showcase.cpp](examples/00-showcase.cpp), [examples/01-basic.cpp](examples/01-basic.cpp), [examples/02-basic.cpp](examples/02-basic.cpp), [examples/03-attachments.cpp](examples/03-attachments.cpp))
++ [users.list](https://api.slack.com/methods/users.list), [users.info](https://api.slack.com/methods/users.info) (see [examples/04-users.cpp](examples/04-users.cpp))
 + [channels.list](https://api.slack.com/methods/users.list), [channels.info](https://api.slack.com/methods/channels.info) (see [examples/05-channels.cpp](examples/05-channels.cpp))
 
 Try out the "magic" functions for grabbing ready-to-use structures. 

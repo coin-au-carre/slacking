@@ -3,7 +3,7 @@
 #include <fstream>
 
 void the_slacking_way() {
-    slack::instance().chat_postMessage.channel_username_iconemoji("#testbot", "Support Bot", ":hamster:");
+    slack::channel_username_iconemoji("#testbot", "Support Bot", ":hamster:");
 
     auto json_attachments = R"([
         {
@@ -22,7 +22,7 @@ void the_slacking_way() {
         }
     ])"_json;
 
-    slack::instance().chat_postMessage.attachments = json_attachments.dump();
+    slack::set_attachments(json_attachments); // equivalent to slack::instance().chat_postMessage.attachments = json_attachments.dump();
     slack::chat_postMessage();
 }
 
