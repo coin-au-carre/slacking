@@ -12,6 +12,7 @@ set (SOURCES_EXAMPLES
     02-basic.cpp
     03-users.cpp
     04-attachments.cpp
+    05-channels.cpp
 )
 
 set (TARGETS_EXAMPLES
@@ -20,6 +21,7 @@ set (TARGETS_EXAMPLES
     02-basic
     03-users
     04-attachments
+    05-channels
 )
 
 foreach( name ${TARGETS_EXAMPLES} )

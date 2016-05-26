@@ -50,8 +50,6 @@ using cwzstring = const wchar_t * ;
 class Slacking; 
 struct Element;
 
-// using Attachment = std::vector<Element>;
-
 // Magic structure for chat.postMessage every public data members can be manually filled.
 struct Magic_chat_postMessage {
     std::string channel{};    // required
@@ -70,6 +68,29 @@ private:
     Slacking& slack_;
 };
 
+// User convenient structure for users.list
+struct User {
+    std::string id;
+    std::string name;
+    std::string email;
+    std::string real_name;
+    std::string presence;
+    bool   is_bot; // someone who left the team is considered as bot? and slackbot is considered as human?
+
+    User(const std::string& i, const std::string& n, const std::string& e, const std::string& r, const std::string& p, bool bot) 
+        : id{i}, name{n}, email{e}, real_name{r}, presence{p}, is_bot{bot} {}
+};
+
+// Channel convenient structure for channels.list
+struct Channel {
+    std::string id;
+    std::string name;
+    unsigned num_members;
+
+    Channel(const std::string& i, const std::string& n, unsigned num) 
+        : id{i}, name{n}, num_members{num} {}
+};
+
 
 // Basic element types. Uses czstring so that it is a POD.
 struct Element {
@@ -78,21 +99,12 @@ struct Element {
     bool empty() const { return value && !value[0]; }
 };
 
-// User convenient structure for users.list
-struct User {
-    bool   is_bot; // someone who left the team is considered as bot? and slackbot is considered as human?
-    std::string name;
-    std::string email;
-    std::string real_name;
-    std::string presence;
-
-    User(bool i, std::string n, std::string e, std::string r, std::string p) 
-        : is_bot{i}, name{n}, email{e}, real_name{r}, presence{p} {}
-};
-
 std::ostream& operator<<(std::ostream &os, const Element& element);
 std::ostream& operator<<(std::ostream &os, const User& user);
-std::ostream& operator<<(std::ostream &os, const std::vector<User>& users);
+std::ostream& operator<<(std::ostream &os, const Channel& channel);
+
+template<typename T>
+std::ostream& operator<<(std::ostream &os, const std::vector<T>& vec);
 
 template<class T> void ignore_unused_parameter( const T& ) {}
 
@@ -154,19 +166,46 @@ public:
         return json["members"];
     }
 
-    std::vector<User> magic_users_list() {
-        auto json_members = users_list();
+    std::vector<User> magic_users_list(bool presence = true) {
+        auto json_members = users_list(presence);
         auto users = std::vector<User>{};
         users.reserve(json_members.size());
         for (auto member : json_members) {
-            auto presence = member.count("presence") ? member["presence"].dump() : "";
-            auto email = member["profile"].count("email") ? member["profile"]["email"].dump() : "";
+            auto presence = member.count("presence") ? member["presence"] : "";
+            auto email = member["profile"].count("email") ? member["profile"]["email"] : "";
             bool is_bot = true;
             if (member["is_bot"].is_boolean()) { is_bot = member["is_bot"]; }
-            users.push_back(User{is_bot, member["name"].dump(), email, member["profile"]["real_name"].dump(), presence});
+            users.push_back(User{member["id"], member["name"], email, member["profile"]["real_name"], presence, is_bot});
         }
         return users;
     }
+
+    Json users_info(const std::string& user_id) {
+        auto json = post("users.info", {{"user", user_id.c_str()}});
+        return json["user"];
+    }
+
+    Json channels_list(bool exclude_archived = false) {
+        auto exclude_archived_char = exclude_archived ? "1" : "0";
+        auto json = post("channels.list", {{"token", token_.c_str()}, {"exclude_archived", exclude_archived_char }});
+        return json["channels"];
+    }
+
+    std::vector<Channel> magic_channels_list(bool exclude_archived = false) {
+        auto json_channels = channels_list(exclude_archived);
+        auto users = std::vector<Channel>{};
+        users.reserve(json_channels.size());
+        for (auto channel : json_channels) {
+            users.push_back(Channel{channel["id"], channel["name"], channel["num_members"]});
+        }
+        return users;
+    }
+
+    Json channels_info(const std::string& channel_id) {
+        auto json = post("channels.info", {{"channel", channel_id.c_str()}});
+        return json["channel"];
+    }
+
 
     void api_test() { auto json = get("api.test"); } // If no error is thrown then everything is ok
 
@@ -259,17 +298,6 @@ Json Magic_chat_postMessage::operator()(std::string text, const std::string& spe
     auto str_channel = specified_channel.empty() ? channel : specified_channel;
     if (str_channel.empty()) { throw std::invalid_argument("channel is not set"); }
     // replace_slack_escape_characters(text); // No need CPR does the work and supports Url encoded POST values
-    // auto str_attachments = std::string{};
-    // if (attachments.size() > 0) {
-    //     str_attachments += '[';
-    //     for (auto const& attachment : attachments) {
-    //         str_attachments += '{' + join(attachment, ",");
-    //         str_attachments.pop_back(); // remove last comma
-    //         str_attachments += "},";
-    //     }
-    //     str_attachments.pop_back(); // remove last comma
-    //     str_attachments += ']';
-    // }
     auto elements = std::vector<Element>{
         { "text"      , text.c_str()         }, 
         { "channel"   , str_channel.c_str()  }, 
@@ -291,17 +319,24 @@ std::ostream& operator<<(std::ostream &os, const Element& element) {
 inline
 std::ostream& operator<<(std::ostream &os, const User& user) {
     std::string bot_str = user.is_bot ? "Bot" : "Human";
-    return os << "{ " << join(std::vector<std::string>{user.name, user.real_name, user.email, bot_str, user.presence}, ", ") << " }";
+    return os << "{ " << join(std::vector<std::string>{user.id, user.name, user.real_name, user.email, user.presence, bot_str}, ", ") << " }";
 }
 
 inline
-std::ostream& operator<<(std::ostream &os, const std::vector<User>& users) {
+std::ostream& operator<<(std::ostream &os, const Channel& channel) {
+    return os << "{ " << join(std::vector<std::string>{channel.id, channel.name, std::to_string(channel.num_members)}, ", ") << " }";
+}
+
+template<typename T>
+inline
+std::ostream& operator<<(std::ostream &os, const std::vector<T>& vec) {
     os << '[';
-    for(auto const& user : users) {
-        os << "\n  " << user << ',';
+    for(auto const& v : vec) {
+        os << "\n  " << v << ',';
     }
     return os << "\b\n]";
 }
+
 
 inline
 Slacking& create(const std::string& token)  {
@@ -330,6 +365,31 @@ Json users_list(bool presence = true) {
 }
 
 inline
+auto magic_users_list(bool presence = true) -> std::vector<User> {
+    return instance().magic_users_list(presence);
+}
+
+inline
+Json users_info(const std::string& user_id) {
+    return instance().users_info(user_id);
+}
+
+inline
+Json channels_list(bool exclude_archived = false) {
+    return instance().channels_list(exclude_archived);
+}
+
+inline
+auto magic_channels_list(bool exclude_archived = false) -> std::vector<Channel> {
+    return instance().magic_channels_list(exclude_archived);
+}
+
+inline
+Json channels_info(const std::string& channels_id) {
+    return instance().channels_info(channels_id);
+}
+
+inline
 void post(const std::string& method, std::vector<Element> elements) {
     instance().post(method, elements);
 }
@@ -346,10 +406,18 @@ using _detail::chat_postMessage;
 // using _detail::Attachment;
 
 using _detail::Slacking;
+
 using _detail::create;
 using _detail::instance;
+
 using _detail::api_test;
 using _detail::users_list;
+using _detail::magic_users_list;
+using _detail::users_info;
+using _detail::channels_list;
+using _detail::magic_channels_list;
+using _detail::channels_info;
+
 using _detail::post;
 using _detail::get;
 using _detail::operator<<;

@@ -95,11 +95,13 @@ The library on `master` branch should always be functional.
 You can use the `slack::post` or `slack::get` methods to fully exploit the [Slack Web API methods](https://api.slack.com/methods).  
 Following C++ helpers free functions and members methods are available in *Slacking* for convenience :
 
-+ [api.test](https://api.slack.com/methods/api.test)
-+ [chat.postMessage](https://api.slack.com/methods/chat.postMessage)
-+ [users.list](https://api.slack.com/methods/users.list)
++ [api.test](https://api.slack.com/methods/api.test) (see [examples/01-basic.cpp](examples/01-basic.cpp))
++ [chat.postMessage](https://api.slack.com/methods/chat.postMessage) (see [examples/00-showcase.cpp](examples/00-showcase.cpp), [examples/01-basic.cpp](examples/01-basic.cpp), [examples/02-basic.cpp](examples/02-basic.cpp), [examples/04-attachments.cpp](examples/04-attachments.cpp))
++ [users.list](https://api.slack.com/methods/users.list), [users.info](https://api.slack.com/methods/users.info) (see [examples/03-users.cpp](examples/03-users.cpp))
++ [channels.list](https://api.slack.com/methods/users.list), [channels.info](https://api.slack.com/methods/channels.info) (see [examples/05-channels.cpp](examples/05-channels.cpp))
 
-More convenient helpers functions and structures are coming...
+Try out the "magic" functions for grabbing ready-to-use structures. 
+This is an ongoing work so more convenient helpers functions and structures might come in the near future...  
 If you need any features feel free to ask and contribute.
 
 

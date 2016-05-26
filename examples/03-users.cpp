@@ -13,7 +13,12 @@ int main() {
     // You can display all the JSON response
     std::cout << slack.users_list() << std::endl; 
 
-    // You can 
-    auto users = slack.magic_users_list();
+    // You can display filtered informations
+    auto users = slack.magic_users_list(); // this is a vector so you can iterate
     std::cout << users << '\n';
+
+    // Iterate on your users
+    for (auto const& user : users) {
+        std::cout << user.name << std::endl;
+    }
 }
