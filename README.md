@@ -7,7 +7,7 @@ Modern C++ people also loves Slack !
 ------------------------------------
 
 *Slacking* is a lightweight **C++11 header only library** for communicating with the [Slack Web API](https://api.slack.com/web).  
-*Slacking* aims to be easy to use. *Slacking* requires to have an [API token](https://api.slack.com/docs/oauth-test-tokens).
+*Slacking* aims to be easy and intuitive to use. *Slacking* requires to have an [API token](https://api.slack.com/docs/oauth-test-tokens).
 
 Example usage
 -------------
@@ -58,7 +58,6 @@ A more elaborated example
 You can make richly-formmated messages with [attachments](https://api.slack.com/docs/attachments).
 
 ```c++
-auto &slack = slack::instance();
 slack.chat.channel_username_iconemoji("#ticker-channel", "Support Bot", ":hamster:");
 
 auto json_attachments = R"([
@@ -73,7 +72,7 @@ auto json_attachments = R"([
     }
 ])"_json;
 
-slack.chat.attachments = json_attachments; // equivalent to slack::instance().chat_postMessage.attachments = json_attachments.dump();
+slack.chat.attachments = json_attachments;
 std::cout << slack::chat_postMessage() << std::endl;
 ```
 

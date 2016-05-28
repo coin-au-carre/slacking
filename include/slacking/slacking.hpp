@@ -41,10 +41,6 @@ namespace slack {
 namespace _detail {
 
 using Json = nlohmann::json;
-using zstring   = char *;
-using zwstring  = wchar_t *;
-using czstring  = const char *;
-using cwzstring = const wchar_t * ;
 
 // forward declaration for category structures
 class  Slacking;
@@ -452,15 +448,19 @@ Json CategoryUsers::info(const std::string& user_id) {
 } // namespace _detail
 
 // Public interface
+using _detail::operator<<;
 using _detail::Slacking;
 
+// Meyers' singleton
 using _detail::create;
 using _detail::instance;
 
+// Generic methods
 using _detail::post;
 using _detail::get;
-using _detail::operator<<;
 
+
+// Helper category getters
 using _detail::api;
 using _detail::channels;
 using _detail::chat;
