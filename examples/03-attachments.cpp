@@ -3,7 +3,8 @@
 #include <fstream>
 
 void the_slacking_way() {
-    slack::set_chat_channel_username_iconemoji("#testbot", "Support Bot", ":hamster:");
+    auto &slack = slack::instance();
+    slack.chat.channel_username_iconemoji("#testbot", "Support Bot", ":hamster:");
 
     auto json_attachments = R"([
         {
@@ -16,14 +17,14 @@ void the_slacking_way() {
             "image_url": "https://img.youtube.com/vi/ND-TuW0KIgg/2.jpg"
         },
         {
-            "fallback": "Danger Danger! Bomb is launched!",
-            "text": "Bomb is launched the slacking way!",
+            "fallback": "Danger from the slacking way!",
+            "text": "Danger from the slacking way!",
             "color": "danger"
         }
     ])"_json;
 
-    slack::set_chat_attachments(json_attachments); // equivalent to slack::instance().chat_postMessage.attachments = json_attachments.dump();
-    slack::chat_postMessage();
+    slack.chat.attachments = json_attachments; 
+    slack.chat.postMessage();
 }
 
 
@@ -39,8 +40,8 @@ void the_hard_way() {
             "image_url": "https://img.youtube.com/vi/ND-TuW0KIgg/2.jpg"
         },
         {
-            "fallback": "Danger Danger! Bomb is launched!",
-            "text": "Bomb is launched the hard way!",
+            "fallback": "Danger from the hard way!",
+            "text": "Danger from the hard way!",
             "color": "danger"
         }
     ])"};
@@ -48,11 +49,11 @@ void the_hard_way() {
     slack::post (   
                     "chat.postMessage",
                     { 
-                        {"text"      , "" }, 
+                        {"text"      , " " }, 
                         {"channel"   , "#testbot"            }, 
                         {"username"  , "Support Bot"         }, 
                         {"icon_emoji", ":hamster:"           },
-                        {"attachments", attachments.c_str()  }
+                        {"attachments", attachments          }
                     }
                 );
 }

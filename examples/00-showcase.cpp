@@ -3,7 +3,8 @@
 #include <fstream>
 
 void more_elaborate_example() {
-    slack::set_chat_channel_username_iconemoji("#mychannel", "Support Bot", ":hamster:");
+    auto &slack = slack::instance();
+    slack.chat.channel_username_iconemoji("#mychannel", "Support Bot", ":hamster:");
 
     auto json_attachments = R"([
         {
@@ -17,8 +18,8 @@ void more_elaborate_example() {
         }
     ])"_json;
 
-    slack::set_chat_attachments(json_attachments); // equivalent to slack::instance().chat_postMessage.attachments = json_attachments.dump();
-    auto result = slack::chat_postMessage();
+    slack.chat.attachments = json_attachments; // equivalent to slack::instance().chat_postMessage.attachments = json_attachments.dump();
+    auto result = slack.chat.postMessage();
 
     std::cout << result << std::endl;
 }
@@ -29,10 +30,8 @@ int main() {
     auto& slack = slack::create("xxx-xxx"); // where "xxx-xxx" is your Slack API token
     slack.chat.channel = "#general";
 
-    {
-        slack::chat_postMessage("Hello there!"); // will send the message "Hello there!" in the channel #general
-    }
-
+    slack.chat.postMessage("Hello there!"); // will send the message "Hello there!" in the channel #general
+    
     {
         // You can also use the generic post slack approach. Parameters (except the token) will not be taken into account.
         // Everything from the Web Slack API is possible here!
@@ -43,7 +42,7 @@ int main() {
                             {"channel"   , "#general"             }, 
                             {"username"  , "peach"                }, 
                             {"icon_emoji", ":princess:"           } 
-                        } // Type of strings are const char*
+                        }
                     );
     }
 

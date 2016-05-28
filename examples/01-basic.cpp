@@ -34,13 +34,13 @@ int main() {
         slack::instance().chat.parse = "full"; // see https://api.slack.com/docs/formatting for more information
 
         // We can also send via helper free function
-        slack::chat_postMessage("Hello @bob please join #general!");
+        slack::instance().chat.postMessage("Hello @bob please join #general!");
 
         // Note that Slacking remembers the chat_postMessage parameters
         // Here we just change the username permanently in the instance parameters
         slack::instance().chat.username = "superbot";
         try {
-            slack::chat_postMessage("Hello there in another chanel!", "#otherchannel");
+            slack::instance().chat.postMessage("Hello there in another chanel!", "#otherchannel");
         }
         catch(std::exception const& e) {
             std::cerr << "channel might not exist: " << e.what() << '\n'; // yep we can try/catch slacking methods

@@ -13,6 +13,7 @@ set (SOURCES_EXAMPLES
     03-attachments.cpp
     04-users.cpp
     05-channels.cpp
+    06-custom_post_get.cpp
 )
 
 set (TARGETS_EXAMPLES
@@ -22,6 +23,7 @@ set (TARGETS_EXAMPLES
     03-attachments
     04-users
     05-channels
+    06-custom_post_get
 )
 
 foreach( name ${TARGETS_EXAMPLES} )

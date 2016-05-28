@@ -52,17 +52,18 @@ struct Element;
 
 // Chat category structure for chat related method such as chat.postMessage. Every public data members can be manually filled.
 struct CategoryChat {
-    std::string channel{};    // required
-    std::string username{};   // optional
-    std::string icon_emoji{}; // optional
-    std::string parse{};      // optional defaults to none
-    std::string attachments{}; // optional should be reset when functor is called
+    std::string channel{};     // required
+    std::string username{};    // optional
+    std::string icon_emoji{};  // optional
+    std::string parse{};       // optional defaults to none
+    Json        attachments{}; // optional should be reset when functor is called
 
     void channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
         channel = c; username = u; icon_emoji = i;
     }
 
-    Json postMessage(std::string text=" ", const std::string& specified_channel="");
+    Json postMessage(const std::string& text=" ", const std::string& specified_channel="");
+    
     CategoryChat(Slacking& slack) : slack_{slack} {}
 
 private:
@@ -93,11 +94,13 @@ struct Channel {
 };
 
 
-// Basic element types. Uses czstring so that it is a POD.
+// Basic element types.
 struct Element {
-    czstring label;
-    czstring value;
-    bool empty() const { return value && !value[0]; }
+    std::string label;
+    std::string value;
+    // bool empty() const { return value && !value[0]; }
+    bool empty() const { return value.empty(); }
+    Element(const std::string& l, const std::string& v) : label(l), value(v) {}
 };
 
 std::ostream& operator<<(std::ostream &os, const Element& element);
@@ -109,11 +112,12 @@ std::ostream& operator<<(std::ostream &os, const std::vector<T>& vec);
 
 template<class T> void ignore_unused_parameter( const T& ) {}
 
-template<typename T>
-std::string join(const std::vector<T>& vec, const std::string& sep = "&");
+void remove_first_last_quote(std::string& s);
+
+std::vector<Element> json_to_elements(const Json& json);
 
 template<typename T>
-std::string join_non_empty(const std::vector<T>& vec, const std::string& sep = "&");
+std::string join(const std::vector<T>& vec, const std::string& sep = "&");
 
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 
@@ -151,19 +155,32 @@ public:
         return json;
     }
 
-    Json post(const std::string& method, std::vector<Element> elements) {
-        elements.emplace_back(Element{"token", token_.c_str()});
+    // Json post(const std::string& method, std::vector<Element> elements) {
+    //     elements.emplace_back("token", token_);
+    //     return post(method, join(elements));
+    // }
+
+    // Json get(const std::string& method, std::vector<Element> elements) {
+    //     elements.emplace_back("token", token_);
+    //     return get(method, join(elements));
+    // }
+
+    Json post(const std::string& method, const Json& json) {
+        auto elements = json_to_elements(json);
+        elements.emplace_back("token", token_);
         return post(method, join(elements));
     }
 
-    Json get(const std::string& method, std::vector<Element> elements) {
-        elements.emplace_back(Element{"token", token_.c_str()});
+    Json get(const std::string& method, const Json& json) {
+        auto elements = json_to_elements(json);
+        elements.emplace_back("token", token_);
         return get(method, join(elements));
     }
 
+
     Json users_list(bool presence = true) {
         auto presence_char = presence ? "1" : "0";
-        auto json = post("users.list", {{"token", token_.c_str()}, {"presence", presence_char }});
+        auto json = post("users.list", {{"token", token_}, {"presence", presence_char }});
         return json["members"];
     }
 
@@ -182,13 +199,13 @@ public:
     }
 
     Json users_info(const std::string& user_id) {
-        auto json = post("users.info", {{"user", user_id.c_str()}});
+        auto json = post("users.info", {{"user", user_id}});
         return json["user"];
     }
 
     Json channels_list(bool exclude_archived = false) {
         auto exclude_archived_char = exclude_archived ? "1" : "0";
-        auto json = post("channels.list", {{"token", token_.c_str()}, {"exclude_archived", exclude_archived_char }});
+        auto json = post("channels.list", {{"token", token_}, {"exclude_archived", exclude_archived_char }});
         return json["channels"];
     }
 
@@ -203,7 +220,7 @@ public:
     }
 
     Json channels_info(const std::string& channel_id) {
-        auto json = post("channels.info", {{"channel", channel_id.c_str()}});
+        auto json = post("channels.info", {{"channel", channel_id}});
         return json["channel"];
     }
 
@@ -250,12 +267,29 @@ private:
     std::string     token_;
 };
 
-inline
-std::string json_to_url(const Json& json) {
-    for (auto& j : json) {
-        std::cout << j << '\n';
+
+inline 
+std::string remove_first_last_quote(std::string str) {
+    auto s = str;
+    if (s.front() == '"' ) {
+        s.erase( 0, 1 );
+        s.erase(s.size() - 1);
     }
-    return json.dump();
+    return s;
+}
+
+
+inline
+auto json_to_elements(const Json& json) -> std::vector<Element> {
+    auto elements = std::vector<Element>{};
+    elements.reserve(json.size() + 1); // +1 for token
+    for (auto it = json.begin(); it != json.end(); ++ it) { 
+        std::string label = it.key();
+        std::stringstream ss_value;
+        ss_value << it.value();
+        elements.emplace_back(label, remove_first_last_quote(ss_value.str()));
+    }
+    return elements;
 }
 
 
@@ -270,19 +304,6 @@ std::string join(const std::vector<T>& vec, const std::string& sep) {
     return ss.str();
 }
 
-template<typename T>
-inline
-std::string join_non_empty(const std::vector<T>& vec, const std::string& sep) {
-    std::stringstream ss;
-    if (vec.size() == 0) { return ""; };
-    ss << vec[0];
-    for (size_t i = 1; i < vec.size(); i ++) { 
-        if (!vec[i].empty()) {
-            ss << sep << vec[i];
-        } 
-    }
-    return ss.str();
-}
 
 inline
 void replace_all(std::string& str, const std::string& from, const std::string& to) {
@@ -294,29 +315,21 @@ void replace_all(std::string& str, const std::string& from, const std::string& t
     }
 }
 
-// https://api.slack.com/docs/formatting
 inline
-void replace_slack_escape_characters(std::string& str) {
-    replace_all(str, "&", "&amp;");
-    replace_all(str, "<", "&lt;");
-    replace_all(str, ">", "&gt;");
-}
-
-inline
-Json CategoryChat::postMessage(std::string text, const std::string& specified_channel) {
+Json CategoryChat::postMessage(const std::string& text, const std::string& specified_channel) {
     auto str_channel = specified_channel.empty() ? channel : specified_channel;
     if (str_channel.empty()) { throw std::invalid_argument("channel is not set"); }
-    // replace_slack_escape_characters(text); // No need CPR does the work and supports Url encoded POST values
-    auto elements = std::vector<Element>{
-        { "text"      , text.c_str()         }, 
-        { "channel"   , str_channel.c_str()  }, 
-        { "username"  , username.c_str()     },
-        { "icon_emoji", icon_emoji.c_str()   },
-        { "parse"     , parse.c_str()        },
-        { "attachments", attachments.c_str() }
+    // auto elements = std::vector<Element>{
+    Json json_arguments = {
+        { "text"       , text         }, 
+        { "channel"    , str_channel  }, 
+        { "username"   , username     },
+        { "icon_emoji" , icon_emoji   },
+        { "parse"      , parse        },
+        { "attachments", attachments }
     };
-    auto json = slack_.post("chat.postMessage", elements);
-    attachments = std::string{}; // reset
+    auto json = slack_.post("chat.postMessage", json_arguments);
+    attachments = Json{}; // reset attachments for future calls
     return json;
 }
 
@@ -337,6 +350,7 @@ std::ostream& operator<<(std::ostream &os, const Channel& channel) {
     return os << "{ " << join(std::vector<std::string>{channel.id, channel.name, std::to_string(channel.num_members)}, ", ") << " }";
 }
 
+// pretty printer for magic output
 template<typename T>
 inline
 std::ostream& operator<<(std::ostream &os, const std::vector<T>& vec) {
@@ -364,25 +378,25 @@ void api_test() {
     instance().api_test();
 }
 
-inline
-Json chat_postMessage(std::string text=" ", const std::string& specified_channel="") {
-    return instance().chat.postMessage(text, specified_channel);
-}
+// inline
+// Json chat_postMessage(const std::string& text=" ", const std::string& specified_channel="") {
+//     return instance().chat.postMessage(text, specified_channel);
+// }
 
-inline
-void set_chat_channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
-    return instance().chat.channel_username_iconemoji(c,u,i);
-}
+// inline
+// void set_chat_channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
+//     return instance().chat.channel_username_iconemoji(c,u,i);
+// }
 
-inline 
-void set_chat_channel(const std::string& channel) {
-    instance().chat.channel = channel;
-}
+// inline 
+// void set_chat_channel(const std::string& channel) {
+//     instance().chat.channel = channel;
+// }
 
-inline
-void set_chat_attachments(const Json& json) {
-    instance().chat.attachments = json.dump();
-}
+// inline
+// void set_chat_attachments(const Json& json) {
+//     instance().chat.attachments = json.dump();
+// }
 
 
 inline
@@ -415,14 +429,24 @@ Json channels_info(const std::string& channels_id) {
     return instance().channels_info(channels_id);
 }
 
+// inline
+// void post(const std::string& method, std::vector<Element> elements) {
+//     instance().post(method, elements);
+// }
+
+// inline
+// void get(const std::string& method, std::vector<Element> elements) {
+//     instance().get(method, elements);
+// }
+
 inline
-void post(const std::string& method, std::vector<Element> elements) {
-    instance().post(method, elements);
+Json post(const std::string& method, const Json& json) {
+    return instance().post(method, json);
 }
 
 inline
-void get(const std::string& method, std::vector<Element> elements) {
-    instance().get(method, elements);
+Json get(const std::string& method, const Json& json) {
+    return instance().get(method, json);
 }
 
 } // namespace _detail
@@ -439,10 +463,10 @@ using _detail::operator<<;
 
 using _detail::api_test;
 
-using _detail::chat_postMessage;
-using _detail::set_chat_channel_username_iconemoji;
-using _detail::set_chat_attachments;
-using _detail::set_chat_channel;
+// using _detail::chat_postMessage;
+// using _detail::set_chat_channel_username_iconemoji;
+// using _detail::set_chat_attachments;
+// using _detail::set_chat_channel;
 
 using _detail::users_list;
 using _detail::magic_users_list;
