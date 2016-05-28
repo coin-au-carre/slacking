@@ -37,7 +37,7 @@ slack::post (
             ); // it is automatically inserted when using slack::post()
 ```
 
-If you prefer to mimic the Json approach given in the API, you can also use this syntax: 
+If you prefer to mimic the Json approach given in the API, you can also use this syntax:
 ```c++
  auto json = R"({
             "text": "Slacking is awesome!",
@@ -73,7 +73,7 @@ auto json_attachments = R"([
 ])"_json;
 
 slack.chat.attachments = json_attachments;
-std::cout << slack::chat_postMessage() << std::endl;
+std::cout << slack.chat.postMessage() << std::endl;
 ```
 
 [![Slacking attachments](doc/showcase_attachments.png?raw=true "Slacking attachments")](https://www.youtube.com/watch?v=ND-TuW0KIgg)
@@ -103,15 +103,16 @@ Ongoing work
 ------------
 
 The library on `master` branch should always be functional.
-You can use the `slack::post` or `slack::get` methods to fully exploit the [Slack Web API methods](https://api.slack.com/methods).  
-Following C++ helpers free functions and members methods are available in *Slacking* for convenience :
+You can use the `slack::post` or `slack::get` methods to fully exploit the [Slack Web API methods](https://api.slack.com/methods). You can refer to [examples/06-custom_post_get.cpp.cpp](examples/06-custom_post_get.cpp.cpp).
+
+Following C++ helpers free functions and member methods are available in *Slacking* for convenience :
 
 + [api.test](https://api.slack.com/methods/api.test) (see [examples/01-basic.cpp](examples/01-basic.cpp))
 + [chat.postMessage](https://api.slack.com/methods/chat.postMessage) (see [examples/00-showcase.cpp](examples/00-showcase.cpp), [examples/01-basic.cpp](examples/01-basic.cpp), [examples/02-basic.cpp](examples/02-basic.cpp), [examples/03-attachments.cpp](examples/03-attachments.cpp))
 + [users.list](https://api.slack.com/methods/users.list), [users.info](https://api.slack.com/methods/users.info) (see [examples/04-users.cpp](examples/04-users.cpp))
 + [channels.list](https://api.slack.com/methods/users.list), [channels.info](https://api.slack.com/methods/channels.info) (see [examples/05-channels.cpp](examples/05-channels.cpp))
 
-Try out the "magic" functions for grabbing ready-to-use structures. 
+Try out the "magic" functions for grabbing ready-to-use structures.
 This is an ongoing work so more convenient helpers functions and structures might come in the near future...  
 If you need any features feel free to ask and contribute.
 
@@ -119,7 +120,7 @@ If you need any features feel free to ask and contribute.
 Manage Slacking instance
 ------------------------
 
-Here are two approaches to keep alive the *Slacking* session in your program so you can use it anytime, anywhere. 
+Here are two approaches to keep alive the *Slacking* session in your program so you can use it anytime, anywhere.
 
 ####Use Meyers singleton
 
@@ -132,7 +133,7 @@ And when you are in another scope and you have lost the `slack` reference, you c
 ```c++
 auto slack& = slack::instance();
 ```
-It might not be the recommended way but since we generally want to handle only Slack instance (one handle), it is highly convenient. You can refer to the example usage and  [examples/01-basic.cpp](examples/01-basic.cpp).
+It might not be the recommended way but since we generally want to handle only one Slack instance (one token), it is highly convenient. You can refer to the example usage and  [examples/01-basic.cpp](examples/01-basic.cpp).
 
 ####Pass by reference (or by pointer)
 
