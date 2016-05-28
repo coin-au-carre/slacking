@@ -14,10 +14,10 @@ int main() {
 
     {
         // Calling API method is easy with some chosen free function 
-        slack::api_test();
+        slack::api().test();
         // Or if you prefer you can take back the instance reference and use member function
         auto& slack = slack::instance();
-        slack.api_test();
+        slack.api.test();
         // Helper member and free functions have the same signature
     }
 
@@ -48,7 +48,7 @@ int main() {
     }
 
     {
-        auto users = slack::users_list();
+        auto users = slack::users().list();
         std::cout << users.dump(2) << '\n'; // will display users list information
     }
 

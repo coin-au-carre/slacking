@@ -47,6 +47,18 @@ int main() {
     }
 
     {
+        // You can also use the generic post with a a Json approach. 
+        auto json = R"({
+            "text": "Slacking is awesome!",
+            "channel" : "#general",
+            "username": "peach",
+            "icon_emoji": ":princess:"
+        })"_json;
+
+        slack::post("chat.postMessage", json);
+    }
+
+    {
         more_elaborate_example();
     }
 }

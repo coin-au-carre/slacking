@@ -46,9 +46,37 @@ using zwstring  = wchar_t *;
 using czstring  = const char *;
 using cwzstring = const wchar_t * ;
 
-// forward declaration for magic structures
-class  Slacking; 
-struct Element;
+// forward declaration for category structures
+class  Slacking;
+
+struct Channel;
+struct User;
+
+// Category structures which mimic Slack API categories
+
+struct CategoryApi {
+    std::string error{}; // not implemented yet
+    std::string foo{};   // not implemented yet
+
+    Json test();
+
+    CategoryApi(Slacking& slack) : slack_{slack} {}
+private:
+    Slacking& slack_;
+};
+
+
+struct CategoryChannels {
+    Json list(bool exclude_archived = false);
+     std::vector<Channel> list_magic(bool exclude_archived = false);
+
+    Json info(const std::string& channel_id);
+
+    CategoryChannels(Slacking& slack) : slack_{slack} {}
+private:
+    Slacking& slack_;
+};
+
 
 // Chat category structure for chat related method such as chat.postMessage. Every public data members can be manually filled.
 struct CategoryChat {
@@ -63,12 +91,27 @@ struct CategoryChat {
     }
 
     Json postMessage(const std::string& text=" ", const std::string& specified_channel="");
-    
+
     CategoryChat(Slacking& slack) : slack_{slack} {}
 
 private:
     Slacking& slack_;
 };
+
+
+struct CategoryUsers {
+    Json list(bool presence = true);
+     std::vector<User> list_magic(bool presence = true);
+
+    Json info(const std::string& user_id);
+
+    CategoryUsers(Slacking& slack) : slack_{slack} {}
+
+private:
+    Slacking& slack_;
+};
+
+
 
 // User convenient structure for users.list
 struct User {
@@ -98,7 +141,6 @@ struct Channel {
 struct Element {
     std::string label;
     std::string value;
-    // bool empty() const { return value && !value[0]; }
     bool empty() const { return value.empty(); }
     Element(const std::string& l, const std::string& v) : label(l), value(v) {}
 };
@@ -127,9 +169,8 @@ void replace_slack_escape_characters(std::string& str);
 class Slacking {
 public:
     Slacking() = delete;
-    Slacking(const std::string& token) : session_{}, token_{token} {
+    Slacking(const std::string& token) : token_{token}, session_{} {
         session_.SetUrl("https://slack.com/api/");
-        // session_.SetTimeout(cpr::Timeout{700});
     }
 
     Slacking(const Slacking&)            = delete;
@@ -155,16 +196,6 @@ public:
         return json;
     }
 
-    // Json post(const std::string& method, std::vector<Element> elements) {
-    //     elements.emplace_back("token", token_);
-    //     return post(method, join(elements));
-    // }
-
-    // Json get(const std::string& method, std::vector<Element> elements) {
-    //     elements.emplace_back("token", token_);
-    //     return get(method, join(elements));
-    // }
-
     Json post(const std::string& method, const Json& json) {
         auto elements = json_to_elements(json);
         elements.emplace_back("token", token_);
@@ -176,55 +207,6 @@ public:
         elements.emplace_back("token", token_);
         return get(method, join(elements));
     }
-
-
-    Json users_list(bool presence = true) {
-        auto presence_char = presence ? "1" : "0";
-        auto json = post("users.list", {{"token", token_}, {"presence", presence_char }});
-        return json["members"];
-    }
-
-    std::vector<User> magic_users_list(bool presence = true) {
-        auto json_members = users_list(presence);
-        auto users = std::vector<User>{};
-        users.reserve(json_members.size());
-        for (auto member : json_members) {
-            auto presence = member.count("presence") ? member["presence"] : "";
-            auto email = member["profile"].count("email") ? member["profile"]["email"].dump() : ""; // dump here because email can be null
-            bool is_bot = true;
-            if (member["is_bot"].is_boolean()) { is_bot = member["is_bot"]; }
-            users.push_back(User{member["id"], member["name"], email, member["profile"]["real_name"], presence, is_bot});
-        }
-        return users;
-    }
-
-    Json users_info(const std::string& user_id) {
-        auto json = post("users.info", {{"user", user_id}});
-        return json["user"];
-    }
-
-    Json channels_list(bool exclude_archived = false) {
-        auto exclude_archived_char = exclude_archived ? "1" : "0";
-        auto json = post("channels.list", {{"token", token_}, {"exclude_archived", exclude_archived_char }});
-        return json["channels"];
-    }
-
-    std::vector<Channel> magic_channels_list(bool exclude_archived = false) {
-        auto json_channels = channels_list(exclude_archived);
-        auto users = std::vector<Channel>{};
-        users.reserve(json_channels.size());
-        for (auto channel : json_channels) {
-            users.push_back(Channel{channel["id"], channel["name"], channel["num_members"]});
-        }
-        return users;
-    }
-
-    Json channels_info(const std::string& channel_id) {
-        auto json = post("channels.info", {{"channel", channel_id}});
-        return json["channel"];
-    }
-
-    void api_test() { auto json = get("api.test"); } // If no error is thrown then everything is ok
 
     void debug() const { std::cout << token_ << std::endl; }
 
@@ -260,13 +242,17 @@ private:
     }
 
 public:
-    CategoryChat chat{*this};
+    CategoryApi      api{*this};
+    CategoryChannels channels{*this};
+    CategoryChat     chat{*this};
+    CategoryUsers    users{*this};
+
+    std::string     token_;
 
 private:
     cpr::Session    session_;
-    std::string     token_;
-};
 
+};
 
 inline 
 std::string remove_first_last_quote(std::string str) {
@@ -277,7 +263,6 @@ std::string remove_first_last_quote(std::string str) {
     }
     return s;
 }
-
 
 inline
 auto json_to_elements(const Json& json) -> std::vector<Element> {
@@ -292,7 +277,6 @@ auto json_to_elements(const Json& json) -> std::vector<Element> {
     return elements;
 }
 
-
 // Free function which looks like python join
 template<typename T>
 inline
@@ -304,7 +288,6 @@ std::string join(const std::vector<T>& vec, const std::string& sep) {
     return ss.str();
 }
 
-
 inline
 void replace_all(std::string& str, const std::string& from, const std::string& to) {
     if(from.empty()) { return; }
@@ -314,25 +297,6 @@ void replace_all(std::string& str, const std::string& from, const std::string& t
         start_pos += to.length();
     }
 }
-
-inline
-Json CategoryChat::postMessage(const std::string& text, const std::string& specified_channel) {
-    auto str_channel = specified_channel.empty() ? channel : specified_channel;
-    if (str_channel.empty()) { throw std::invalid_argument("channel is not set"); }
-    // auto elements = std::vector<Element>{
-    Json json_arguments = {
-        { "text"       , text         }, 
-        { "channel"    , str_channel  }, 
-        { "username"   , username     },
-        { "icon_emoji" , icon_emoji   },
-        { "parse"      , parse        },
-        { "attachments", attachments }
-    };
-    auto json = slack_.post("chat.postMessage", json_arguments);
-    attachments = Json{}; // reset attachments for future calls
-    return json;
-}
-
 
 inline
 std::ostream& operator<<(std::ostream &os, const Element& element) {
@@ -374,72 +338,6 @@ Slacking& instance() {
 }
 
 inline
-void api_test() {
-    instance().api_test();
-}
-
-// inline
-// Json chat_postMessage(const std::string& text=" ", const std::string& specified_channel="") {
-//     return instance().chat.postMessage(text, specified_channel);
-// }
-
-// inline
-// void set_chat_channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
-//     return instance().chat.channel_username_iconemoji(c,u,i);
-// }
-
-// inline 
-// void set_chat_channel(const std::string& channel) {
-//     instance().chat.channel = channel;
-// }
-
-// inline
-// void set_chat_attachments(const Json& json) {
-//     instance().chat.attachments = json.dump();
-// }
-
-
-inline
-Json users_list(bool presence = true) {
-    return instance().users_list(presence);
-}
-
-inline
-auto magic_users_list(bool presence = true) -> std::vector<User> {
-    return instance().magic_users_list(presence);
-}
-
-inline
-Json users_info(const std::string& user_id) {
-    return instance().users_info(user_id);
-}
-
-inline
-Json channels_list(bool exclude_archived = false) {
-    return instance().channels_list(exclude_archived);
-}
-
-inline
-auto magic_channels_list(bool exclude_archived = false) -> std::vector<Channel> {
-    return instance().magic_channels_list(exclude_archived);
-}
-
-inline
-Json channels_info(const std::string& channels_id) {
-    return instance().channels_info(channels_id);
-}
-
-// inline
-// void post(const std::string& method, std::vector<Element> elements) {
-//     instance().post(method, elements);
-// }
-
-// inline
-// void get(const std::string& method, std::vector<Element> elements) {
-//     instance().get(method, elements);
-// }
-
-inline
 Json post(const std::string& method, const Json& json) {
     return instance().post(method, json);
 }
@@ -448,6 +346,108 @@ inline
 Json get(const std::string& method, const Json& json) {
     return instance().get(method, json);
 }
+
+// Helper functions to get category structures instance()
+
+inline
+CategoryApi& api() {
+    return instance().api;
+}
+
+inline
+CategoryChannels& channels() {
+    return instance().channels;
+}
+
+inline
+CategoryChat& chat() {
+    return instance().chat;
+}
+
+inline
+CategoryUsers& users() {
+    return instance().users;
+}
+
+
+// Definitions of category methods
+
+inline
+Json CategoryApi::test() {
+    auto json = slack_.get("api.test");
+    return json;
+}
+
+
+inline
+Json CategoryChannels::list(bool exclude_archived) {
+    auto exclude_archived_char = exclude_archived ? "1" : "0";
+    auto json = slack_.post("channels.list", {{"token", slack_.token_}, {"exclude_archived", exclude_archived_char }});
+    return json["channels"];
+}
+
+inline
+auto CategoryChannels::list_magic(bool exclude_archived) -> std::vector<Channel> {
+    auto json_channels = list(exclude_archived);
+    auto users = std::vector<Channel>{};
+    users.reserve(json_channels.size());
+    for (auto channel : json_channels) {
+        users.push_back(Channel{channel["id"], channel["name"], channel["num_members"]});
+    }
+    return users;
+}
+
+inline
+Json CategoryChannels::info(const std::string& channel_id) {
+    auto json = slack_.post("channels.info", {{"channel", channel_id}});
+    return json["channel"];
+}
+
+inline
+Json CategoryChat::postMessage(const std::string& text, const std::string& specified_channel) {
+    auto str_channel = specified_channel.empty() ? channel : specified_channel;
+    if (str_channel.empty()) { throw std::invalid_argument("channel is not set"); }
+    Json json_arguments = {
+        { "text"       , text         }, 
+        { "channel"    , str_channel  }, 
+        { "username"   , username     },
+        { "icon_emoji" , icon_emoji   },
+        { "parse"      , parse        },
+        { "attachments", attachments }
+    };
+    auto json = slack_.post("chat.postMessage", json_arguments);
+    attachments = Json{};
+    return json;
+}
+
+inline
+Json CategoryUsers::list(bool presence) {
+    auto presence_char = presence ? "1" : "0";
+    auto json = slack_.post("users.list", {{"token", slack_.token_}, {"presence", presence_char }});
+    return json["members"];
+}
+
+inline
+auto CategoryUsers::list_magic(bool presence) -> std::vector<User> {
+    auto json_members = list(presence);
+    auto users = std::vector<User>{};
+    users.reserve(json_members.size());
+    for (auto member : json_members) {
+        auto presence = member.count("presence") ? member["presence"] : "";
+        auto email = member["profile"].count("email") ? member["profile"]["email"].dump() : ""; // dump here because email can be null
+        bool is_bot = true;
+        if (member["is_bot"].is_boolean()) { is_bot = member["is_bot"]; }
+        users.push_back(User{member["id"], member["name"], email, member["profile"]["real_name"], presence, is_bot});
+    }
+    return users;
+}
+
+inline
+Json CategoryUsers::info(const std::string& user_id) {
+    auto json = slack_.post("users.info", {{"user", user_id}});
+    return json["user"];
+}
+
 
 } // namespace _detail
 
@@ -461,21 +461,12 @@ using _detail::post;
 using _detail::get;
 using _detail::operator<<;
 
-using _detail::api_test;
+using _detail::api;
+using _detail::channels;
+using _detail::chat;
+using _detail::users;
 
-// using _detail::chat_postMessage;
-// using _detail::set_chat_channel_username_iconemoji;
-// using _detail::set_chat_attachments;
-// using _detail::set_chat_channel;
-
-using _detail::users_list;
-using _detail::magic_users_list;
-using _detail::users_info;
-
-using _detail::channels_list;
-using _detail::magic_channels_list;
-using _detail::channels_info;
-
+using _detail::Json;
 
 } // namespace slack
 

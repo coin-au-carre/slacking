@@ -11,10 +11,10 @@ int main() {
     slack::create(mytoken);
     
     // You can display all the JSON response
-    std::cout << slack::channels_list() << std::endl; 
+    std::cout << slack::instance().channels.list() << std::endl; 
 
     // You can display filtered informations
-    auto channels = slack::magic_channels_list();
+    auto channels = slack::channels().list_magic();
     std::cout << channels << '\n';
 
     // Iterate on channels
@@ -24,7 +24,7 @@ int main() {
 
     // Get precise informations on a specific channel
     auto channel_id = channels[0].id;
-    std::cout << slack::channels_info(channel_id) << std::endl;
+    std::cout << slack::channels().info(channel_id) << std::endl;
 }
 
 

@@ -11,8 +11,7 @@ class Foo {
 
 public:
     Foo(slack::Slacking& slack) : slack_{slack} {
-        slack_.get().chat.postMessage("Foo class ctor"); // parameters given in bar() should be kept
-        // slack_.instance().post(...) method is also available as member function
+        slack_.get().chat.postMessage("Foo class ctor"); // parameters channel, username, iconemoji reused from bar()
     }
 }; 
 

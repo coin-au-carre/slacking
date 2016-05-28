@@ -15,12 +15,12 @@ Example usage
 Initialize a slack instance:
 ```c++
 auto& slack = slack::create("xxx-xxx-xxx-xxx"); // "xxx-xxx-xxx-xxx" is your Slack API token
-slack.chat_postMessage.channel = "#general";    // set a default channel
+slack.chat.channel = "#general"; // set a default channel
 ```
 
 Sending a message in Slack is easy:
 ```c++
-slack::chat_postMessage("Hello there!"); // will send the message "Hello there!" in the channel #general with the registered token
+slack.chat.postMessage("Hello there!"); // will send the message "Hello there!" in the channel #general with the registered token
 ```
 
 If you need maximum control, you can use the generic functions `slack::post` or `slack::get`.  
@@ -29,12 +29,24 @@ Everything available in [Web Slack API](https://api.slack.com/methods) is possib
 slack::post (   
                 "chat.postMessage",
                 {
-                    {"text"      , "Slacking is awesome!"   },
-                    {"channel"   , "#mychannel"             },
-                    {"username"  , "peach"                  },
-                    {"icon_emoji", ":princess:"             }
-                } // note that "token" is not needed here and is the only "registred" parameter
+                    {"text"      , "Slacking is awesome!" },
+                    {"channel"   , "#mychannel"           },
+                    {"username"  , "peach"                },
+                    {"icon_emoji", ":princess:"           }
+                } // note that "token" is not needed here and is a "registered" parameter
             ); // it is automatically inserted when using slack::post()
+```
+
+If you prefer to mimic the Json approach given in the API, you can also use this syntax: 
+```c++
+ auto json = R"({
+            "text": "Slacking is awesome!",
+            "channel" : "#general",
+            "username": "peach",
+            "icon_emoji": ":princess:"
+        })"_json;
+
+slack::post("chat.postMessage", json);
 ```
 
 Check out the [examples](examples/) for more illustrations.  
@@ -46,7 +58,8 @@ A more elaborated example
 You can make richly-formmated messages with [attachments](https://api.slack.com/docs/attachments).
 
 ```c++
-slack::channel_username_iconemoji("#ticker-channel", "Support Bot", ":hamster:");
+auto &slack = slack::instance();
+slack.chat.channel_username_iconemoji("#ticker-channel", "Support Bot", ":hamster:");
 
 auto json_attachments = R"([
     {
@@ -60,7 +73,7 @@ auto json_attachments = R"([
     }
 ])"_json;
 
-slack::set_attachments(json_attachments);
+slack.chat.attachments = json_attachments; // equivalent to slack::instance().chat_postMessage.attachments = json_attachments.dump();
 std::cout << slack::chat_postMessage() << std::endl;
 ```
 
@@ -70,6 +83,7 @@ The output will give a JSON response sent back by Slack:
 ```
 {"channel":"C1AUF9AN4","message":{"attachments":[{"color":"7CD197","fallback":"New ticket from Bjarne Stroustrup - Ticket #2017: Still looking for reflection","id":1,"image_bytes":4820,"image_height":90,"image_url":"https://img.youtube.com/vi/ND-TuW0KIgg/2.jpg","image_width":120,"pretext":"New ticket from Bjarne Stroustrup","text":"Help me adding reflection!","title":"Ticket #2017: Still looking for reflection","title_link":"https://www.youtube.com/watch?v=ND-TuW0KIgg"}],"bot_id":"B20LJ4Y12","icons":{"emoji":":hamster:","image_64":"https://slack.global.ssl.fastly.net/d4bf/img/emoji_2015_2/apple/1f439.png"},"subtype":"bot_message","text":" ","ts":"1464251666.000063","type":"message","username":"Support Bot"},"ok":true,"ts":"1464251666.000063"}
 ```
+
 
 Requirements
 ------------
@@ -127,7 +141,7 @@ An other approach is to pass the *Slacking* instance by reference, store it, and
 
 ```c++
 void foo(slack::Slacking& slack) {
-    slack.chat_postMessage("I am slacking!", "#random");
+    slack.chat.postMessage("I am slacking!", "#random");
 }
 
 int main() {

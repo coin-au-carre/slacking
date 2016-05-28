@@ -4,7 +4,7 @@
 
 void the_slacking_way() {
     auto &slack = slack::instance();
-    slack.chat.channel_username_iconemoji("#testbot", "Support Bot", ":hamster:");
+    slack.chat.channel_username_iconemoji("#mychannel", "Support Bot", ":hamster:");
 
     auto json_attachments = R"([
         {
@@ -29,31 +29,31 @@ void the_slacking_way() {
 
 
 void the_hard_way() {
-    auto attachments = std::string{R"([
+    auto json_attachments = R"([
         {
             "fallback": "New ticket from Bjarne Stroustrup - Ticket #2017: Still looking for reflection",
             "pretext": "New ticket from Bjarne Stroustrup",
             "title": "Ticket #2017: Still looking for reflection",
             "title_link": "https://www.youtube.com/watch?v=ND-TuW0KIgg",
             "text": "Help me adding reflection!",
-            "color": "#7CD197", 
+            "color": "#7CD197",
             "image_url": "https://img.youtube.com/vi/ND-TuW0KIgg/2.jpg"
         },
         {
-            "fallback": "Danger from the hard way!",
-            "text": "Danger from the hard way!",
+            "fallback": "Danger from the slacking way!",
+            "text": "Danger from the slacking way!",
             "color": "danger"
         }
-    ])"};
+    ])"_json;
 
     slack::post (   
                     "chat.postMessage",
                     { 
                         {"text"      , " " }, 
-                        {"channel"   , "#testbot"            }, 
+                        {"channel"   , "#mychannel"          }, 
                         {"username"  , "Support Bot"         }, 
                         {"icon_emoji", ":hamster:"           },
-                        {"attachments", attachments          }
+                        {"attachments", json_attachments     }
                     }
                 );
 }
