@@ -3,7 +3,7 @@
 #include <fstream>
 
 void more_elaborate_example() {
-    slack::channel_username_iconemoji("#mychannel", "Support Bot", ":hamster:");
+    slack::set_chat_channel_username_iconemoji("#mychannel", "Support Bot", ":hamster:");
 
     auto json_attachments = R"([
         {
@@ -17,7 +17,7 @@ void more_elaborate_example() {
         }
     ])"_json;
 
-    slack::set_attachments(json_attachments); // equivalent to slack::instance().chat_postMessage.attachments = json_attachments.dump();
+    slack::set_chat_attachments(json_attachments); // equivalent to slack::instance().chat_postMessage.attachments = json_attachments.dump();
     auto result = slack::chat_postMessage();
 
     std::cout << result << std::endl;
@@ -27,7 +27,7 @@ void more_elaborate_example() {
 int main() {
 
     auto& slack = slack::create("xxx-xxx"); // where "xxx-xxx" is your Slack API token
-    slack.chat_postMessage.channel = "#general";
+    slack.chat.channel = "#general";
 
     {
         slack::chat_postMessage("Hello there!"); // will send the message "Hello there!" in the channel #general

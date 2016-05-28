@@ -47,11 +47,11 @@ using czstring  = const char *;
 using cwzstring = const wchar_t * ;
 
 // forward declaration for magic structures
-class Slacking; 
+class  Slacking; 
 struct Element;
 
-// Magic structure for chat.postMessage every public data members can be manually filled.
-struct Magic_chat_postMessage {
+// Chat category structure for chat related method such as chat.postMessage. Every public data members can be manually filled.
+struct CategoryChat {
     std::string channel{};    // required
     std::string username{};   // optional
     std::string icon_emoji{}; // optional
@@ -62,8 +62,8 @@ struct Magic_chat_postMessage {
         channel = c; username = u; icon_emoji = i;
     }
 
-    Json operator()(std::string text=" ", const std::string& specified_channel="");
-    Magic_chat_postMessage(Slacking& slack) : slack_{slack} {}
+    Json postMessage(std::string text=" ", const std::string& specified_channel="");
+    CategoryChat(Slacking& slack) : slack_{slack} {}
 
 private:
     Slacking& slack_;
@@ -110,10 +110,10 @@ std::ostream& operator<<(std::ostream &os, const std::vector<T>& vec);
 template<class T> void ignore_unused_parameter( const T& ) {}
 
 template<typename T>
-std::string join(const std::vector<T>& vec, const std::string sep = "&");
+std::string join(const std::vector<T>& vec, const std::string& sep = "&");
 
 template<typename T>
-std::string join_non_empty(const std::vector<T>& vec, const std::string sep = "&");
+std::string join_non_empty(const std::vector<T>& vec, const std::string& sep = "&");
 
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 
@@ -243,17 +243,26 @@ private:
     }
 
 public:
-    Magic_chat_postMessage chat_postMessage{*this};
+    CategoryChat chat{*this};
 
 private:
     cpr::Session    session_;
     std::string     token_;
 };
 
+inline
+std::string json_to_url(const Json& json) {
+    for (auto& j : json) {
+        std::cout << j << '\n';
+    }
+    return json.dump();
+}
+
+
 // Free function which looks like python join
 template<typename T>
 inline
-std::string join(const std::vector<T>& vec, const std::string sep) {
+std::string join(const std::vector<T>& vec, const std::string& sep) {
     std::stringstream ss;
     if (vec.size() == 0) { return ""; };
     ss << vec[0];
@@ -263,7 +272,7 @@ std::string join(const std::vector<T>& vec, const std::string sep) {
 
 template<typename T>
 inline
-std::string join_non_empty(const std::vector<T>& vec, const std::string sep) {
+std::string join_non_empty(const std::vector<T>& vec, const std::string& sep) {
     std::stringstream ss;
     if (vec.size() == 0) { return ""; };
     ss << vec[0];
@@ -294,7 +303,7 @@ void replace_slack_escape_characters(std::string& str) {
 }
 
 inline
-Json Magic_chat_postMessage::operator()(std::string text, const std::string& specified_channel) {
+Json CategoryChat::postMessage(std::string text, const std::string& specified_channel) {
     auto str_channel = specified_channel.empty() ? channel : specified_channel;
     if (str_channel.empty()) { throw std::invalid_argument("channel is not set"); }
     // replace_slack_escape_characters(text); // No need CPR does the work and supports Url encoded POST values
@@ -357,17 +366,22 @@ void api_test() {
 
 inline
 Json chat_postMessage(std::string text=" ", const std::string& specified_channel="") {
-    return instance().chat_postMessage(text, specified_channel);
+    return instance().chat.postMessage(text, specified_channel);
 }
 
 inline
-void channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
-    return instance().chat_postMessage.channel_username_iconemoji(c,u,i);
+void set_chat_channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
+    return instance().chat.channel_username_iconemoji(c,u,i);
+}
+
+inline 
+void set_chat_channel(const std::string& channel) {
+    instance().chat.channel = channel;
 }
 
 inline
-void set_attachments(const Json& json) {
-    instance().chat_postMessage.attachments = json.dump();
+void set_chat_attachments(const Json& json) {
+    instance().chat.attachments = json.dump();
 }
 
 
@@ -426,8 +440,9 @@ using _detail::operator<<;
 using _detail::api_test;
 
 using _detail::chat_postMessage;
-using _detail::channel_username_iconemoji;
-using _detail::set_attachments;
+using _detail::set_chat_channel_username_iconemoji;
+using _detail::set_chat_attachments;
+using _detail::set_chat_channel;
 
 using _detail::users_list;
 using _detail::magic_users_list;
