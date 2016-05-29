@@ -9,6 +9,17 @@ Modern C++ people also loves Slack !
 *Slacking* is a lightweight **C++11 header only library** for communicating with the [Slack Web API](https://api.slack.com/web).  
 *Slacking* aims to be easy and intuitive to use. *Slacking* requires to have an [API token](https://api.slack.com/docs/oauth-test-tokens).
 
+
+Requirements
+------------
+
++ C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7) and GCC (4.9, 5).
++ [Curl](https://curl.haxx.se/libcurl/) (which you probably already have).
+
+Note: *Slacking* uses the awesome [C++ Requests](https://github.com/whoshuu/cpr) (CPR) and [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project.
+CPR has been rewritten in order to be a header only library. Hence, you don't have to install anything!
+
+
 Example usage
 -------------
 
@@ -40,11 +51,11 @@ slack::post (
 If you prefer to mimic the Json approach given in the API, you can also use this syntax:
 ```c++
  auto json = R"({
-            "text": "Slacking is awesome!",
-            "channel" : "#general",
-            "username": "peach",
-            "icon_emoji": ":princess:"
-        })"_json;
+    "text": "Slacking is awesome!",
+    "channel" : "#general",
+    "username": "peach",
+    "icon_emoji": ":princess:"
+})"_json;
 
 slack::post("chat.postMessage", json);
 ```
@@ -55,7 +66,7 @@ Check out the [examples](examples/) for more illustrations.
 A more elaborated example
 -------------------------
 
-You can make richly-formmated messages with [attachments](https://api.slack.com/docs/attachments).
+You can make richly-formated messages with [attachments](https://api.slack.com/docs/attachments).
 
 ```c++
 slack.chat.channel_username_iconemoji("#ticker-channel", "Support Bot", ":hamster:");
@@ -73,25 +84,24 @@ auto json_attachments = R"([
 ])"_json;
 
 slack.chat.attachments = json_attachments;
-std::cout << slack.chat.postMessage() << std::endl;
+auto response = slack.chat.postMessage(); // slack::Json
+std::cout << result << std::endl;
 ```
 
 [![Slacking attachments](doc/showcase_attachments.png?raw=true "Slacking attachments")](https://www.youtube.com/watch?v=ND-TuW0KIgg)
 
-The output will give a JSON response sent back by Slack:
+The output from response will give a JSON response sent back by Slack:
 ```
 {"channel":"C1AUF9AN4","message":{"attachments":[{"color":"7CD197","fallback":"New ticket from Bjarne Stroustrup - Ticket #2017: Still looking for reflection","id":1,"image_bytes":4820,"image_height":90,"image_url":"https://img.youtube.com/vi/ND-TuW0KIgg/2.jpg","image_width":120,"pretext":"New ticket from Bjarne Stroustrup","text":"Help me adding reflection!","title":"Ticket #2017: Still looking for reflection","title_link":"https://www.youtube.com/watch?v=ND-TuW0KIgg"}],"bot_id":"B20LJ4Y12","icons":{"emoji":":hamster:","image_64":"https://slack.global.ssl.fastly.net/d4bf/img/emoji_2015_2/apple/1f439.png"},"subtype":"bot_message","text":" ","ts":"1464251666.000063","type":"message","username":"Support Bot"},"ok":true,"ts":"1464251666.000063"}
 ```
 
+Since Slack::Json is a [nlohmann::json](https://github.com/nlohmann/json), you can play with the response easily (conversions, STL like access, ...). `response["ok"]` will give `true`.
 
-Requirements
-------------
 
-+ C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7) and GCC (4.9, 5).
-+ [Curl](https://curl.haxx.se/libcurl/) (which you probably already have).
+#### A word about error handling
 
-Note: *Slacking* uses the awesome [C++ Requests](https://github.com/whoshuu/cpr) (CPR) and [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project.
-CPR have been rewritten in order to be a header only library. Hence, you don't have to install anything!
+Slacking will throw a runtime error exception if the curl request did not succeed, if the response from Slack is not correct or if `response["ok"]` received is not `true`. You are free to handle these exceptions the way you like. 
+
 
 Installation
 ------------
