@@ -17,7 +17,13 @@ Requirements
 + [Curl](https://curl.haxx.se/libcurl/) (which you probably already have).
 
 Note: *Slacking* uses the awesome [C++ Requests](https://github.com/whoshuu/cpr) (CPR) and [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project.
-CPR has been rewritten in order to be a header only library. Hence, you don't have to install anything!
+CPR has been rewritten to be a header only library. Hence, you don't have to install anything!
+
+
+Installation
+------------
+
+Just copy the `include/slacking` folder in your project and add `#include "slacking.hpp"`. That's all.  
 
 
 Example usage
@@ -84,7 +90,7 @@ auto json_attachments = R"([
 ])"_json;
 
 slack.chat.attachments = json_attachments;
-auto response = slack.chat.postMessage(); // slack::Json
+auto response = slack.chat.postMessage(); // slack::Json object
 std::cout << result << std::endl;
 ```
 
@@ -95,18 +101,12 @@ The output from response will give a JSON response sent back by Slack:
 {"channel":"C1AUF9AN4","message":{"attachments":[{"color":"7CD197","fallback":"New ticket from Bjarne Stroustrup - Ticket #2017: Still looking for reflection","id":1,"image_bytes":4820,"image_height":90,"image_url":"https://img.youtube.com/vi/ND-TuW0KIgg/2.jpg","image_width":120,"pretext":"New ticket from Bjarne Stroustrup","text":"Help me adding reflection!","title":"Ticket #2017: Still looking for reflection","title_link":"https://www.youtube.com/watch?v=ND-TuW0KIgg"}],"bot_id":"B20LJ4Y12","icons":{"emoji":":hamster:","image_64":"https://slack.global.ssl.fastly.net/d4bf/img/emoji_2015_2/apple/1f439.png"},"subtype":"bot_message","text":" ","ts":"1464251666.000063","type":"message","username":"Support Bot"},"ok":true,"ts":"1464251666.000063"}
 ```
 
-Since Slack::Json is a [nlohmann::json](https://github.com/nlohmann/json), you can play with the response easily (conversions, STL like access, ...). `response["ok"]` will give `true`.
+Since Slack::Json is a [nlohmann::json](https://github.com/nlohmann/json), you have all the features of the latter one (conversions, STL like access, ...). For instance, `response["ok"]` will give `true`.
 
 
 #### A word about error handling
 
-Slacking will throw a runtime error exception if the curl request did not succeed, if the response from Slack is not correct or if `response["ok"]` received is not `true`. You are free to handle these exceptions the way you like. 
-
-
-Installation
-------------
-
-Just copy the `include/slacking` folder in your project and add `#include "slacking.hpp"`. That's all.  
+Slacking will throw a runtime error exception if the curl request does not succeed, if the response from Slack is not correct, or if `response["ok"]` received is not `true`. You are free to handle these exceptions the way you like.
 
 
 Ongoing work
