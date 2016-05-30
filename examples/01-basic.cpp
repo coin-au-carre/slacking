@@ -25,20 +25,23 @@ int main() {
         // Get the instance and fill some permanent chat_postMessage parameters
         auto& slack = slack::instance();
         slack.chat.channel = "#mychannel"; // required
-        slack.chat.username = "botname";   // optional
+        slack.chat.username = "botname";   // optional check the doc
+
         slack.chat.postMessage("Hello there! Visit https://api.slack.com !");
     }
 
     {
         // We don't always have to store a reference
         slack::instance().chat.parse = "full"; // see https://api.slack.com/docs/formatting for more information
-
-        // We can also send via helper free function
-        slack::instance().chat.postMessage("Hello @bob please join #general!");
+        // slack::chat().parse = "full"; // alternative equivalent helper function
 
         // Note that Slacking remembers the chat_postMessage parameters
-        // Here we just change the username permanently in the instance parameters
-        slack::instance().chat.username = "superbot";
+        // Here we just change the as_user parameter permanently
+        slack::chat().as_user = true; // see as_user documentation it will override username here
+
+        // We can also send via helper free function
+        slack::chat().postMessage("Hello @bob please join #general!");
+
         try {
             slack::instance().chat.postMessage("Hello there in another chanel!", "#otherchannel");
         }

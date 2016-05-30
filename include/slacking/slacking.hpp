@@ -51,8 +51,8 @@ struct User;
 // Category structures which mimic Slack API categories
 
 struct CategoryApi {
-    std::string error{}; // not implemented yet
-    std::string foo{};   // not implemented yet
+    // std::string error{}; // not implemented yet
+    // std::string foo{};   // not implemented yet
 
     Json test();
 
@@ -76,11 +76,14 @@ private:
 
 // Chat category structure for chat related method such as chat.postMessage. Every public data members can be manually filled.
 struct CategoryChat {
-    std::string channel{};     // required
-    std::string username{};    // optional
-    std::string icon_emoji{};  // optional
-    std::string parse{};       // optional defaults to none
-    Json        attachments{}; // optional should be reset when functor is called
+    std::string channel{};      // required
+    std::string username{};     // optional
+    std::string icon_url{};     // optional
+    std::string icon_emoji{};   // optional
+    std::string parse{};        // optional defaults to none
+    bool        as_user{false}; // optional
+    Json        attachments{};  // optional should be reset when functor is called
+    // unsigned    link_names{1};
 
     void channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
         channel = c; username = u; icon_emoji = i;
@@ -165,7 +168,7 @@ void replace_slack_escape_characters(std::string& str);
 class Slacking {
 public:
     Slacking() = delete;
-    Slacking(const std::string& token) : token_{token}, session_{} {
+    Slacking(const std::string& token) : session_{}, token_{token} {
         session_.SetUrl("https://slack.com/api/");
     }
 
@@ -237,17 +240,15 @@ private:
         }
     }
 
+private:
+    cpr::Session    session_;
+
 public:
+    std::string      token_;
     CategoryApi      api{*this};
     CategoryChannels channels{*this};
     CategoryChat     chat{*this};
     CategoryUsers    users{*this};
-
-    std::string     token_;
-
-private:
-    cpr::Session    session_;
-
 };
 
 inline 
@@ -292,6 +293,13 @@ void replace_all(std::string& str, const std::string& from, const std::string& t
         str.replace(start_pos, from.length(), to);
         start_pos += to.length();
     }
+}
+
+inline
+std::string bool_to_string(const bool b) {
+    std::ostringstream ss;
+    ss << std::boolalpha << b;
+    return ss.str();
 }
 
 inline
@@ -404,12 +412,13 @@ Json CategoryChat::postMessage(const std::string& text, const std::string& speci
     auto str_channel = specified_channel.empty() ? channel : specified_channel;
     if (str_channel.empty()) { throw std::invalid_argument("channel is not set"); }
     Json json_arguments = {
-        { "text"       , text         }, 
-        { "channel"    , str_channel  }, 
-        { "username"   , username     },
-        { "icon_emoji" , icon_emoji   },
-        { "parse"      , parse        },
-        { "attachments", attachments }
+        { "text"       , text           }, 
+        { "channel"    , str_channel    }, 
+        { "username"   , username       },
+        { "icon_emoji" , icon_emoji     },
+        { "parse"      , parse          },
+        { "attachments", attachments    },
+        { "as_user"    , bool_to_string(as_user) }
     };
     auto json = slack_.post("chat.postMessage", json_arguments);
     attachments = Json{};
