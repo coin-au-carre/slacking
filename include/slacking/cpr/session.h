@@ -123,6 +123,7 @@ class Session {
 };
 
 
+inline
 Session::Impl::Impl() {
     curl_ = std::unique_ptr<CurlHolder, std::function<void(CurlHolder*) >>(newHolder(),
                                                                            &Impl::freeHolder);
@@ -151,30 +152,36 @@ Session::Impl::Impl() {
     }
 }
 
+inline
 void Session::Impl::freeHolder(CurlHolder* holder) {
     curl_easy_cleanup(holder->handle);
     curl_slist_free_all(holder->chunk);
     delete holder;
 }
 
+inline
 CurlHolder* Session::Impl::newHolder() {
     CurlHolder* holder = new CurlHolder();
     holder->handle = curl_easy_init();
     return holder;
 }
 
+inline
 void Session::Impl::SetUrl(const Url& url) {
     url_ = url;
 }
 
+inline
 void Session::Impl::SetParameters(const Parameters& parameters) {
     parameters_ = parameters;
 }
 
+inline
 void Session::Impl::SetParameters(Parameters&& parameters) {
     parameters_ = std::move(parameters);
 }
 
+inline
 void Session::Impl::SetHeader(const Header& header) {
     auto curl = curl_->handle;
     if (curl) {
@@ -193,6 +200,7 @@ void Session::Impl::SetHeader(const Header& header) {
     }
 }
 
+inline
 void Session::Impl::SetTimeout(const Timeout& timeout) {
     auto curl = curl_->handle;
     if (curl) {
@@ -200,6 +208,7 @@ void Session::Impl::SetTimeout(const Timeout& timeout) {
     }
 }
 
+inline
 void Session::Impl::SetAuth(const Authentication& auth) {
     auto curl = curl_->handle;
     if (curl) {
@@ -208,6 +217,7 @@ void Session::Impl::SetAuth(const Authentication& auth) {
     }
 }
 
+inline
 void Session::Impl::SetDigest(const Digest& auth) {
     auto curl = curl_->handle;
     if (curl) {
@@ -216,6 +226,7 @@ void Session::Impl::SetDigest(const Digest& auth) {
     }
 }
 
+inline
 void Session::Impl::SetPayload(Payload&& payload) {
     auto curl = curl_->handle;
     if (curl) {
@@ -224,6 +235,7 @@ void Session::Impl::SetPayload(Payload&& payload) {
     }
 }
 
+inline
 void Session::Impl::SetPayload(const Payload& payload) {
     auto curl = curl_->handle;
     if (curl) {
@@ -232,14 +244,17 @@ void Session::Impl::SetPayload(const Payload& payload) {
     }
 }
 
+inline
 void Session::Impl::SetProxies(const Proxies& proxies) {
     proxies_ = proxies;
 }
 
+inline
 void Session::Impl::SetProxies(Proxies&& proxies) {
     proxies_ = std::move(proxies);
 }
 
+inline
 void Session::Impl::SetMultipart(Multipart&& multipart) {
     auto curl = curl_->handle;
     if (curl) {
@@ -264,6 +279,7 @@ void Session::Impl::SetMultipart(Multipart&& multipart) {
     }
 }
 
+inline
 void Session::Impl::SetMultipart(const Multipart& multipart) {
     auto curl = curl_->handle;
     if (curl) {
@@ -288,6 +304,7 @@ void Session::Impl::SetMultipart(const Multipart& multipart) {
     }
 }
 
+inline
 void Session::Impl::SetRedirect(const bool& redirect) {
     auto curl = curl_->handle;
     if (curl) {
@@ -295,6 +312,7 @@ void Session::Impl::SetRedirect(const bool& redirect) {
     }
 }
 
+inline
 void Session::Impl::SetMaxRedirects(const MaxRedirects& max_redirects) {
     auto curl = curl_->handle;
     if (curl) {
@@ -302,6 +320,7 @@ void Session::Impl::SetMaxRedirects(const MaxRedirects& max_redirects) {
     }
 }
 
+inline
 void Session::Impl::SetCookies(const Cookies& cookies) {
     auto curl = curl_->handle;
     if (curl) {
@@ -310,6 +329,7 @@ void Session::Impl::SetCookies(const Cookies& cookies) {
     }
 }
 
+inline
 void Session::Impl::SetBody(Body&& body) {
     auto curl = curl_->handle;
     if (curl) {
@@ -318,6 +338,7 @@ void Session::Impl::SetBody(Body&& body) {
     }
 }
 
+inline
 void Session::Impl::SetBody(const Body& body) {
     auto curl = curl_->handle;
     if (curl) {
@@ -326,6 +347,7 @@ void Session::Impl::SetBody(const Body& body) {
     }
 }
 
+inline
 Response Session::Impl::Delete() {
     auto curl = curl_->handle;
     if (curl) {
@@ -338,6 +360,7 @@ Response Session::Impl::Delete() {
     return makeRequest(curl);
 }
 
+inline
 Response Session::Impl::Get() {
     auto curl = curl_->handle;
     if (curl) {
@@ -349,6 +372,7 @@ Response Session::Impl::Get() {
     return makeRequest(curl);
 }
 
+inline
 Response Session::Impl::Head() {
     auto curl = curl_->handle;
     if (curl) {
@@ -360,6 +384,7 @@ Response Session::Impl::Head() {
     return makeRequest(curl);
 }
 
+inline
 Response Session::Impl::Options() {
     auto curl = curl_->handle;
     if (curl) {
@@ -372,6 +397,7 @@ Response Session::Impl::Options() {
     return makeRequest(curl);
 }
 
+inline
 Response Session::Impl::Patch() {
     auto curl = curl_->handle;
     if (curl) {
@@ -382,10 +408,12 @@ Response Session::Impl::Patch() {
     return makeRequest(curl);
 }
 
+inline
 Response Session::Impl::Post() {
     return makeRequest(curl_->handle);
 }
 
+inline
 Response Session::Impl::Put() {
     auto curl = curl_->handle;
     if (curl) {
@@ -396,6 +424,7 @@ Response Session::Impl::Put() {
     return makeRequest(curl);
 }
 
+inline
 Response Session::Impl::makeRequest(CURL* curl) {
     if (!parameters_.content.empty()) {
         Url new_url{url_ + "?" + parameters_.content};

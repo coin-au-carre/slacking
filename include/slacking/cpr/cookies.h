@@ -24,9 +24,11 @@ class Cookies {
 };
 
 
+inline
 Cookies::Cookies(const std::initializer_list<std::pair<const std::string, std::string>>& pairs)
         : map_{pairs} {}
 
+inline
 std::string Cookies::GetEncoded() const {
     std::stringstream stream;
     for (const auto& item : map_) {
@@ -43,6 +45,7 @@ std::string Cookies::GetEncoded() const {
     return stream.str();
 }
 
+inline
 std::string& Cookies::operator[](const std::string& key) {
     return map_[key];
 }

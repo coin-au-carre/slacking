@@ -22,6 +22,7 @@ class Authentication {
     std::string auth_string_;
 };
 
+inline
 const char* Authentication::GetAuthString() const noexcept {
     return auth_string_.data();
 }

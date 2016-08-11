@@ -30,12 +30,14 @@ class Parameters {
     std::string content;
 };
 
+inline
 Parameters::Parameters(const std::initializer_list<Parameter>& parameters) {
     for (const auto& parameter : parameters) {
         AddParameter(parameter);
     }
 }
 
+inline
 void Parameters::AddParameter(const Parameter& parameter) {
     if (!content.empty()) {
         content += "&";

@@ -39,8 +39,10 @@ class Payload {
     std::string content;
 };
 
+inline
 Payload::Payload(const std::initializer_list<Pair>& pairs) : Payload(begin(pairs), end(pairs)) {}
 
+inline
 void Payload::AddPair(const Pair& pair) {
     if (!content.empty()) {
         content += "&";

@@ -50,7 +50,7 @@ class Error {
     static ErrorCode getErrorCodeForCurlError(std::int32_t curl_code);
 };
 
-
+inline
 ErrorCode Error::getErrorCodeForCurlError(std::int32_t curl_code) {
     switch (curl_code) {
         case CURLE_OK:

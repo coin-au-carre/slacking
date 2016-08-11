@@ -38,6 +38,7 @@ class Multipart {
     std::vector<Part> parts;
 };
 
+inline
 Multipart::Multipart(const std::initializer_list<Part>& parts) : parts{parts} {}
 
 } // namespace cpr

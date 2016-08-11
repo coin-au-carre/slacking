@@ -21,6 +21,7 @@ std::vector<std::string> split(const std::string& to_split, char delimiter);
 std::string urlEncode(const std::string& response);
 
 
+inline
 Header parseHeader(const std::string& headers) {
     Header header;
     std::vector<std::string> lines;
@@ -52,6 +53,7 @@ Header parseHeader(const std::string& headers) {
     return header;
 }
 
+inline
 std::string parseResponse(const std::string& response) {
     if (!response.empty()) {
         if (response.back() == '\n') {
@@ -62,6 +64,7 @@ std::string parseResponse(const std::string& response) {
     return response;
 }
 
+inline
 std::vector<std::string> split(const std::string& to_split, char delimiter) {
     std::vector<std::string> tokens;
 
@@ -74,11 +77,13 @@ std::vector<std::string> split(const std::string& to_split, char delimiter) {
     return tokens;
 }
 
+inline
 size_t writeFunction(void* ptr, size_t size, size_t nmemb, std::string* data) {
     data->append((char*) ptr, size * nmemb);
     return size * nmemb;
 }
 
+inline
 std::string urlEncode(const std::string& value) {
     std::ostringstream escaped;
     escaped.fill('0');

@@ -20,13 +20,16 @@ class Proxies {
     std::map<std::string, std::string> hosts_;
 };
 
+inline
 Proxies::Proxies(const std::initializer_list<std::pair<const std::string, std::string>>& hosts)
         : hosts_{hosts} {}
 
+inline
 bool Proxies::has(const std::string& protocol) const {
     return hosts_.count(protocol) > 0;
 }
 
+inline
 const std::string& Proxies::operator[](const std::string& protocol) {
     return hosts_[protocol];
 }

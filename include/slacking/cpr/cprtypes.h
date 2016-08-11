@@ -15,6 +15,7 @@ struct CaseInsensitiveCompare {
 using Header = std::map<std::string, std::string, CaseInsensitiveCompare>;
 using Url = std::string;
 
+inline
 bool CaseInsensitiveCompare::operator()(const std::string& a, const std::string& b) const noexcept {
     return std::lexicographical_compare(
             a.begin(), a.end(), b.begin(), b.end(),

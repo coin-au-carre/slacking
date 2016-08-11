@@ -15,6 +15,7 @@ class Digest : public Authentication {
     const char* GetAuthString() const noexcept;
 };
 
+inline
 const char* Digest::GetAuthString() const noexcept {
     return Authentication::GetAuthString();
 }
