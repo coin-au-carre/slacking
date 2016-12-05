@@ -1,13 +1,32 @@
-Slacking  
-========
+Slacking - Lazy modern C++ people also loves Slack !
+====================================================
 
 [![Build Status](https://travis-ci.org/coin-au-carre/slacking.svg?branch=master)](https://travis-ci.org/coin-au-carre/slacking)
 
-Modern C++ people also loves Slack !
-------------------------------------
+Simple C++ Slack API
+--------------------
 
 *Slacking* is a lightweight **C++11 header only library** for communicating with the [Slack Web API](https://api.slack.com/web).  
-*Slacking* aims to be easy and intuitive to use. *Slacking* requires to have an [API token](https://api.slack.com/docs/oauth-test-tokens).
+It aims to be easy to use and stick to the API style proposed by Slack. *Slacking* requires to have an [API token](https://api.slack.com/docs/oauth-test-tokens).
+
+
+Requirements
+------------
+
++ C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7) and GCC (4.9, 5).
++ [Curl](https://curl.haxx.se/libcurl/) (which you probably already have).
+
+Note: *Slacking* uses the awesome [C++ Requests](https://github.com/whoshuu/cpr) (CPR) and [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project.
+CPR has been rewritten to be a header only library. Hence, you don't have to install anything!
+
+
+Installation
+------------
+
+Just copy the `include/slacking` folder in your project and add `#include "slacking.hpp"`. That's all.  
+If you have already installed CPR or Nlohmann Json, feel free to use them accordingly to your project and just copy the `include/slacking.hpp` file.
+
+
 
 
 Requirements
@@ -29,16 +48,28 @@ Just copy the `include/slacking` folder in your project and add `#include "slack
 Example usage
 -------------
 
-Initialize a slack instance:
+#### Initialize a slack instance
 ```c++
 auto& slack = slack::create("xxx-xxx-xxx-xxx"); // "xxx-xxx-xxx-xxx" is your Slack API token
 slack.chat.channel = "#general"; // set a default channel
 ```
 
-Sending a message in Slack is intuitive, the __chat.postMessage__ syntax is easily recognizable:
+#### Sending a message in Slack is easy ([preview](https://goo.gl/GC9w3p))
+
 ```c++
 slack.chat.postMessage("Hello there!"); // will send the message "Hello there!" in the channel #general with the registered token
 ```
+Note that we try to stick with the Slack API documentation: the __chat.postMessage__ syntax is easily recognizable.
+
+#### Sending a message with a specified channel, username and icon ([preview](https://goo.gl/1UhzpM))
+
+```c++
+slack.chat.channel_username_iconemoji("#superchannel", "Ghost Bot", ":ghost:");
+slack.chat.postMessage("Slacking is simple"); // will send the message "Hello there!" in the channel #general with the registered token
+```
+Note that theses changes are persistent inside the slack instance. 
+
+#### Sending complex messages (functionnal approach) ([preview](https://goo.gl/GLrlT2))
 
 If you need maximum control, you can use the generic functions `slack::post` or `slack::get`.  
 Everything available in [Web Slack API](https://api.slack.com/methods) is possible from here.
@@ -54,7 +85,10 @@ slack::post (
             ); // it is automatically inserted when using slack::post()
 ```
 
-If you prefer to mimic the Json approach given in the API, you can also use this syntax:
+
+#### Sending complex messages (JSON approach) ([preview](https://goo.gl/GLrlT2))
+
+If you prefer to mimic the Json approach given in the API, you can also use this syntax: 
 ```c++
  auto json = R"({
     "text": "But Our Princess is in Another Castle!",
@@ -69,7 +103,7 @@ slack::post("chat.postMessage", json);
 Check out the [examples](examples/) for more illustrations.  
 
 
-A more elaborated example
+A more elaborated example ([preview](https://goo.gl/syHOka))
 -------------------------
 
 You can make richly-formated messages with [attachments](https://api.slack.com/docs/attachments).
