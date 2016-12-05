@@ -48,7 +48,7 @@ slack.chat.postMessage("Hello there!"); // will send the message "Hello there!" 
 slack.chat.channel_username_iconemoji("#superchannel", "Ghost Bot", ":ghost:");
 slack.chat.postMessage("Slacking is simple"); // will send the message "Hello there!" in the channel #general with the registered token
 ```
-
+Note that theses changes are persistent inside the slack instance. 
 
 #### Sending complex messages (functionnal approach) ([preview](https://goo.gl/GLrlT2))
 
