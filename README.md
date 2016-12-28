@@ -1,7 +1,7 @@
 Slacking - Lazy modern C++ people also loves Slack !
 ====================================================
 
-[![Build Status](https://travis-ci.org/coin-au-carre/slacking.svg?branch=master)](https://travis-ci.org/coin-au-carre/slacking)
+[![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)  [![Standard](https://img.shields.io/badge/c%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/BSL-1.0) [![Build Status](https://travis-ci.org/coin-au-carre/slacking.svg?branch=master)](https://travis-ci.org/coin-au-carre/slacking) [![GitHub version](https://badge.fury.io/gh/coin-au-carre%2Fslacking.svg)](https://badge.fury.io/gh/coin-au-carre%2Fslacking)
 
 Simple C++ Slack API
 --------------------
@@ -14,10 +14,9 @@ Requirements
 ------------
 
 + C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7) and GCC (4.9, 5).
-+ [Curl](https://curl.haxx.se/libcurl/) (which you probably already have).
++ [libcurl](https://curl.haxx.se/libcurl/) (which you probably already have).
 
-Note: *Slacking* uses the awesome [C++ Requests](https://github.com/whoshuu/cpr) (CPR) and [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project.
-CPR has been rewritten to be a header only library. Hence, you don't have to install anything!
+Note: *Slacking* uses the awesome [C++ Requests](https://github.com/whoshuu/cpr) aka CPR a wrapper around libcurl and [Nlohmann Json](https://github.com/nlohmann/json). Both projects are included in the project and CPR has been rewritten to be a header only library. Hence, you don't have to install anything!
 
 
 Installation
