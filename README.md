@@ -1,7 +1,7 @@
 Slacking - Lazy modern C++ people also loves Slack !
 ====================================================
 
-[![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)  [![Standard](https://img.shields.io/badge/c%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/BSL-1.0) [![Build Status](https://travis-ci.org/coin-au-carre/slacking.svg?branch=master)](https://travis-ci.org/coin-au-carre/slacking) [![GitHub version](https://badge.fury.io/gh/coin-au-carre%2Fslacking.svg)](https://badge.fury.io/gh/coin-au-carre%2Fslacking)
+[![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)  [![Standard](https://img.shields.io/badge/c%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT) [![Build Status](https://travis-ci.org/coin-au-carre/slacking.svg?branch=master)](https://travis-ci.org/coin-au-carre/slacking) [![GitHub version](https://badge.fury.io/gh/coin-au-carre%2Fslacking.svg)](https://github.com/coin-au-carre/slacking/releases)
 
 Simple C++ Slack API
 --------------------
