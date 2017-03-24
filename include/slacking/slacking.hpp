@@ -27,7 +27,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <sstream>
+// #include <sstream>
 
 #include <curl/curl.h>
 #include "json.hpp"  // nlohmann/json
@@ -59,48 +59,13 @@ public:
     }
     ~Session() { curl_easy_cleanup(curl_); }
 
-    void SetUrl(const std::string& url)     { url_ = url;   }
-    void SetBody(const std::string& data)   { 
-        if (curl_) {
-            curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, data.length());
-            curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, data.data());
-        }
-    }
+    void SetUrl(const std::string& url) { url_ = url;   }
 
-    Response Get() {
-        if (curl_) {
-            curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
-            curl_easy_setopt(curl_, CURLOPT_POST, 0L);
-            curl_easy_setopt(curl_, CURLOPT_NOBODY, 0L);
-        }
-        return makeRequest();
-    }
+    void SetBody(const std::string& data);
+    Response Get();
+    Response Post();
+    Response makeRequest();
 
-    Response Post() {
-        return makeRequest();
-    }
-
-    Response makeRequest() {
-        curl_easy_setopt(curl_, CURLOPT_URL, url_.c_str());
-
-        std::string response_string;
-        std::string header_string;
-        curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, writeFunction);
-        curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &response_string);
-        curl_easy_setopt(curl_, CURLOPT_HEADERDATA, &header_string);
-
-        res_ = curl_easy_perform(curl_);
-
-        bool is_error = false;
-        std::string error_msg = "";
-        if(res_ != CURLE_OK) {
-            // fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res_));
-            std::string error_msg = "curl_easy_perform() failed " + std::string{curl_easy_strerror(res_)};
-            throw std::runtime_error(error_msg);
-        }
-
-        return { response_string, is_error, error_msg };
-    }
 
 private:
     static size_t writeFunction(void* ptr, size_t size, size_t nmemb, std::string* data) {
@@ -113,6 +78,53 @@ private:
     CURLcode    res_;
     std::string url_;
 };
+
+inline
+void Session::SetBody(const std::string& data) { 
+        if (curl_) {
+            curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, data.length());
+            curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, data.data());
+        }
+    }
+
+inline
+Response Session::Get() {
+    if (curl_) {
+        curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
+        curl_easy_setopt(curl_, CURLOPT_POST, 0L);
+        curl_easy_setopt(curl_, CURLOPT_NOBODY, 0L);
+    }
+    return makeRequest();
+}
+
+inline
+Response Session::Post() {
+    return makeRequest();
+}
+
+inline
+Response Session::makeRequest() {
+    curl_easy_setopt(curl_, CURLOPT_URL, url_.c_str());
+
+    std::string response_string;
+    std::string header_string;
+    curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, writeFunction);
+    curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &response_string);
+    curl_easy_setopt(curl_, CURLOPT_HEADERDATA, &header_string);
+
+    res_ = curl_easy_perform(curl_);
+
+    bool is_error = false;
+    std::string error_msg = "";
+    if(res_ != CURLE_OK) {
+        // fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res_));
+        std::string error_msg = "curl_easy_perform() failed " + std::string{curl_easy_strerror(res_)};
+        throw std::runtime_error(error_msg);
+    }
+
+    return { response_string, is_error, error_msg };
+}
+
 
 
 
@@ -331,10 +343,10 @@ private:
 public:
     std::string         token_;
     bool                throw_exception_;
-    CategoryApi         api{*this};
+    CategoryApi         api     {*this};
     CategoryChannels    channels{*this};
-    CategoryChat        chat{*this};
-    CategoryUsers       users{*this};
+    CategoryChat        chat    {*this};
+    CategoryUsers       users   {*this};
 };
 
 inline 
