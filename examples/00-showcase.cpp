@@ -27,7 +27,7 @@ void more_elaborate_example() {
 
 int main() {
 
-    auto& slack = slack::create("xoxp-2913345840-19787049399-22463788291-d729fc5676"); // where "xxx-xxx" is your Slack API token
+    auto& slack = slack::create("xxx-xxx"); // where "xxx-xxx" is your Slack API token
     slack.chat.channel = "#general";
 
     slack.chat.postMessage("Hello there!"); // will send the message "Hello there!" in the channel #general
