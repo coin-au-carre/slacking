@@ -30,7 +30,7 @@
 #include <sstream>
 
 #include <curl/curl.h>
-#include "json/json.hpp"  // nlohmann/json
+#include "json.hpp"  // nlohmann/json
 
 
 #ifndef  SLACKING_VERBOSE_OUTPUT
