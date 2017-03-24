@@ -4,9 +4,9 @@ Slacking - Lazy modern C++ people also loves Slack !
 [![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)  [![Standard](https://img.shields.io/badge/c%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT) [![Build Status](https://travis-ci.org/coin-au-carre/slacking.svg?branch=master)](https://travis-ci.org/coin-au-carre/slacking) [![GitHub version](https://badge.fury.io/gh/coin-au-carre%2Fslacking.svg)](https://github.com/coin-au-carre/slacking/releases)
 
 Last update (March 2017) 
-========================
+------------------------
 
-Slacking is smaller. Now you only need two header files `include/slacking.hpp` and `include/json.hpp` in order to use *Slacking* ! [CPR](https://github.com/whoshuu/cpr) has been removed so you do not longer need it. All the curl work is directly integrated in `slacking.hpp`.
+Slacking is much smaller. Now you only need two header files `include/slacking.hpp` and `include/json.hpp` in order to use *Slacking* ! [CPR](https://github.com/whoshuu/cpr) has been removed so you do not longer need it. All the curl work is directly integrated in `slacking.hpp`.
 
 
 Simple C++ Slack API
