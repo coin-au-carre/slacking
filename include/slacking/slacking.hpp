@@ -30,8 +30,8 @@
 #include <sstream>
 
 #include <curl/curl.h>
+#include "json/json.hpp"  // nlohmann/json
 
-#include "json.hpp"  // nlohmann/json
 
 #ifndef  SLACKING_VERBOSE_OUTPUT
 # define SLACKING_VERBOSE_OUTPUT  0
@@ -44,15 +44,13 @@ namespace _detail {
 // Json
 using Json = nlohmann::json;
 
-
-// Simple curl
-
 struct Response {
     std::string text;
     bool        is_error;
     std::string error_message;
 };
 
+// Simple curl Session inspired by CPR
 class Session {
 public:
     Session() {
@@ -244,7 +242,8 @@ void replace_slack_escape_characters(std::string& str);
 class Slacking {
 public:
     Slacking() = delete;
-    Slacking(const std::string& token) : session_{}, token_{token} {
+    Slacking(const std::string& token, bool throw_exception = true) 
+    : session_{}, token_{token}, throw_exception_{throw_exception} {
         session_.SetUrl("https://slack.com/api/");
     }
 
@@ -252,11 +251,19 @@ public:
     Slacking& operator=(const Slacking&) = delete;
 
     void reset_token(const std::string& token) { token_ = token; };
+    void set_throw_exception(bool throw_exception) { throw_exception_ = throw_exception; }
+
+    void trigger_error(const std::string& msg) {
+        if (throw_exception_) 
+            throw std::runtime_error(msg);
+        else 
+            std::cerr << "[slacking] error " << msg << '\n';
+    }
 
     Json post(const std::string& method, const std::string& data = "") {
         setParameters(method, data);
         auto response = session_.Post();
-        if (response.is_error) { throw std::runtime_error(response.error_message); }
+        if (response.is_error) { trigger_error(response.error_message); }
         auto json = Json::parse(response.text);
         checkResponse(method, json);
         return json;
@@ -265,7 +272,7 @@ public:
     Json get(const std::string& method, const std::string& data = "") {
         setParameters(method, data);
         auto response = session_.Get();
-        if (response.is_error) { throw std::runtime_error(response.error_message); }
+        if (response.is_error) { trigger_error(response.error_message); }
         auto json = Json::parse(response.text);
         checkResponse(method, json);
         return json;
@@ -283,7 +290,7 @@ public:
         return get(method, join(elements));
     }
 
-    void debug() const { std::cout << token_ << std::endl; }
+    void debug() const { std::cout << token_ << '\n'; }
 
 private:
     void setParameters(const std::string& method, const std::string& data = "") {
@@ -291,7 +298,7 @@ private:
         session_.SetUrl(complete_url);
         session_.SetBody(data);
 #if SLACKING_VERBOSE_OUTPUT
-        std::cout << ">> sending: "<< complete_url << "  " << data << std::endl;
+        std::cout << ">> sending: "<< complete_url << "  " << data << '\n';
 #endif
     }
 
@@ -307,11 +314,13 @@ private:
                 if (json.count("error")) {
                     auto reason = json["error"].dump();
 #if SLACKING_VERBOSE_OUTPUT
-                    std::cerr << "<< Error! " << method << " call [failed] Reason given: " << reason << std::endl;
+                    std::cerr << "<< error! " << method << " call [failed] Reason given: " << reason << '\n';
 #endif
-                    throw std::runtime_error(reason);
+                    trigger_error(reason);
                 }
-                throw std::runtime_error("checkResponse() unknown error.");
+                else {
+                    trigger_error("checkResponse() unknown error.");
+                }
             }
         }
     }
@@ -320,11 +329,12 @@ private:
     Session    session_;
 
 public:
-    std::string      token_;
-    CategoryApi      api{*this};
-    CategoryChannels channels{*this};
-    CategoryChat     chat{*this};
-    CategoryUsers    users{*this};
+    std::string         token_;
+    bool                throw_exception_;
+    CategoryApi         api{*this};
+    CategoryChannels    channels{*this};
+    CategoryChat        chat{*this};
+    CategoryUsers       users{*this};
 };
 
 inline 
@@ -407,8 +417,8 @@ std::ostream& operator<<(std::ostream &os, const std::vector<T>& vec) {
 
 
 inline
-Slacking& create(const std::string& token)  {
-    static Slacking instance(token);
+Slacking& create(const std::string& token, bool throw_exception = true)  {
+    static Slacking instance(token, throw_exception);
     return instance;
 }
 
@@ -486,7 +496,7 @@ Json CategoryChannels::info(const std::string& channel_id) {
 inline
 Json CategoryChat::postMessage(const std::string& text, const std::string& specified_channel) {
     auto str_channel = specified_channel.empty() ? channel : specified_channel;
-    if (str_channel.empty()) { throw std::invalid_argument("channel is not set"); }
+    if (str_channel.empty()) { throw std::runtime_error("channel is not set"); }
     Json json_arguments = {
         { "text"       , text           }, 
         { "channel"    , str_channel    }, 
