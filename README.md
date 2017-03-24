@@ -154,7 +154,7 @@ Manage Slacking instance
 
 Here are two approaches to keep alive the *Slacking* session in your program so you can use it anytime, anywhere.
 
-####Use Meyers singleton
+#### Use Meyers singleton
 
 *Slacking* provides free convenient functions : `slack::create(const std::string& token)` and `slack::instance()`.
 Initialize the Slacking instance with:
@@ -167,7 +167,7 @@ auto slack& = slack::instance();
 ```
 It might not be the recommended way but since we generally want to handle only one Slack instance (one token), it is highly convenient. You can refer to the example usage and  [examples/01-basic.cpp](examples/01-basic.cpp).
 
-####Pass by reference (or by pointer)
+#### Pass by reference (or by pointer)
 
 An other approach is to pass the *Slacking* instance by reference, store it, and call the appropriate methods when needed.
 
