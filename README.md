@@ -29,9 +29,6 @@ Installation
 ------------
 
 Just copy the `include/slacking` folder in your project and add `#include "slacking.hpp"`. That's all.  
-If you have already installed CPR or Nlohmann Json, feel free to use them accordingly to your project and just copy the `include/slacking.hpp` file.
-
-
 
 
 Requirements
@@ -40,9 +37,7 @@ Requirements
 + C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7) and GCC (4.9, 5).
 + [Curl](https://curl.haxx.se/libcurl/) (which you probably already have).
 
-Note: *Slacking* uses the awesome [C++ Requests](https://github.com/whoshuu/cpr) (CPR) and [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project.
-CPR has been rewritten to be a header only library. Hence, you don't have to install anything!
-
+Note: *Slacking* uses the awesome ~~[C++ Requests](https://github.com/whoshuu/cpr) (CPR) and ~~ (not anymore !) [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project.
 
 Installation
 ------------
