@@ -27,11 +27,12 @@ void more_elaborate_example() {
 
 int main() {
 
-    auto& slack = slack::create("xxx-xxx"); // where "xxx-xxx" is your Slack API token
+    auto& slack = slack::create("xoxp-2913345840-19787049399-22463788291-d729fc5676"); // where "xxx-xxx" is your Slack API token
     slack.chat.channel = "#general";
 
     slack.chat.postMessage("Hello there!"); // will send the message "Hello there!" in the channel #general
     
+    // example 1
     {
         // You can also use the generic post slack approach. Parameters (except the token) will not be taken into account.
         // Everything from the Web Slack API is possible here!
@@ -46,6 +47,7 @@ int main() {
                     );
     }
 
+    // example 2
     {
         // You can also use the generic post with a a Json approach. 
         auto json = R"({
@@ -58,6 +60,7 @@ int main() {
         slack::post("chat.postMessage", json);
     }
 
+    // example 3
     {
         more_elaborate_example();
     }

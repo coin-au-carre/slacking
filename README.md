@@ -3,11 +3,17 @@ Slacking - Lazy modern C++ people also loves Slack !
 
 [![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)  [![Standard](https://img.shields.io/badge/c%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT) [![Build Status](https://travis-ci.org/coin-au-carre/slacking.svg?branch=master)](https://travis-ci.org/coin-au-carre/slacking) [![GitHub version](https://badge.fury.io/gh/coin-au-carre%2Fslacking.svg)](https://github.com/coin-au-carre/slacking/releases)
 
+Last update (March 2017) : Slacking is easier to install
+==========================================================
+
+Now you only need two header files `include/slacking.hpp` and `include/json.hpp` in order to use *Slacking* ! [CPR](https://github.com/whoshuu/cpr) has been removed so you do not longer need it. All the curl work is directly integrated in `slacking.hpp`.
+
+
 Simple C++ Slack API
 --------------------
 
-*Slacking* is a lightweight **C++11 header only library** for communicating with the [Slack Web API](https://api.slack.com/web).  
-It aims to be easy to use and stick to the API style proposed by Slack. *Slacking* requires to have an [API token](https://api.slack.com/docs/oauth-test-tokens).
+*Slacking* is a lightweight **C++11 header only library** (only two header files !) for communicating with the [Slack Web API](https://api.slack.com/web).  
+*Slacking* aims to be easy to use and stick to the API style proposed by Slack. *Slacking* requires to have an [API token](https://api.slack.com/docs/oauth-test-tokens).
 
 
 Requirements
@@ -16,7 +22,7 @@ Requirements
 + C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7) and GCC (4.9, 5).
 + [libcurl](https://curl.haxx.se/libcurl/) (which you probably already have).
 
-Note: *Slacking* uses the awesome [C++ Requests](https://github.com/whoshuu/cpr) aka CPR a wrapper around libcurl and [Nlohmann Json](https://github.com/nlohmann/json). Both projects are included in the project and CPR has been rewritten to be a header only library. Hence, you don't have to install anything!
+Note: *Slacking*  uses [Nlohmann Json](https://github.com/nlohmann/json) which is available in `include/json.hpp`
 
 
 Installation

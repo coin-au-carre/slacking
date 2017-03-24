@@ -3,7 +3,7 @@
 
 // The MIT License (MIT)
 // 
-// Copyright (c) 2016 Florian Dang
+// Copyright (c) 2016, 2017 Florian Dang
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +29,9 @@
 #include <vector>
 #include <sstream>
 
-#include "cpr/cpr.h"      // whoshuu/cpr (modified header only version)
-#include "json/json.hpp"  // nlohmann/json
+#include <curl/curl.h>
+
+#include "json.hpp"  // nlohmann/json
 
 #ifndef  SLACKING_VERBOSE_OUTPUT
 # define SLACKING_VERBOSE_OUTPUT  0
@@ -40,7 +41,82 @@ namespace slack {
 
 namespace _detail {
 
+// Json
 using Json = nlohmann::json;
+
+
+// Simple curl
+
+struct Response {
+    std::string text;
+    bool        is_error;
+    std::string error_message;
+};
+
+class Session {
+public:
+    Session() {
+        curl_global_init(CURL_GLOBAL_ALL);
+        curl_ = curl_easy_init();
+    }
+    ~Session() { curl_easy_cleanup(curl_); }
+
+    void SetUrl(const std::string& url)     { url_ = url;   }
+    void SetBody(const std::string& data)   { 
+        if (curl_) {
+            curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, data.length());
+            curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, data.data());
+        }
+    }
+
+    Response Get() {
+        if (curl_) {
+            curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
+            curl_easy_setopt(curl_, CURLOPT_POST, 0L);
+            curl_easy_setopt(curl_, CURLOPT_NOBODY, 0L);
+        }
+        return makeRequest();
+    }
+
+    Response Post() {
+        return makeRequest();
+    }
+
+    Response makeRequest() {
+        curl_easy_setopt(curl_, CURLOPT_URL, url_.c_str());
+
+        std::string response_string;
+        std::string header_string;
+        curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, writeFunction);
+        curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &response_string);
+        curl_easy_setopt(curl_, CURLOPT_HEADERDATA, &header_string);
+
+        res_ = curl_easy_perform(curl_);
+
+        bool is_error = false;
+        std::string error_msg = "";
+        if(res_ != CURLE_OK) {
+            // fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res_));
+            std::string error_msg = "curl_easy_perform() failed " + std::string{curl_easy_strerror(res_)};
+            throw std::runtime_error(error_msg);
+        }
+
+        return { response_string, is_error, error_msg };
+    }
+
+private:
+    static size_t writeFunction(void* ptr, size_t size, size_t nmemb, std::string* data) {
+        data->append((char*) ptr, size * nmemb);
+        return size * nmemb;
+    }
+
+private:
+    CURL*       curl_;
+    CURLcode    res_;
+    std::string url_;
+};
+
+
 
 // forward declaration for category structures
 class  Slacking;
@@ -64,7 +140,7 @@ private:
 
 struct CategoryChannels {
     Json list(bool exclude_archived = false);
-     std::vector<Channel> list_magic(bool exclude_archived = false);
+    std::vector<Channel> list_magic(bool exclude_archived = false);
 
     Json info(const std::string& channel_id);
 
@@ -180,7 +256,7 @@ public:
     Json post(const std::string& method, const std::string& data = "") {
         setParameters(method, data);
         auto response = session_.Post();
-        if (response.error) { throw std::runtime_error(response.error.message); }
+        if (response.is_error) { throw std::runtime_error(response.error_message); }
         auto json = Json::parse(response.text);
         checkResponse(method, json);
         return json;
@@ -189,7 +265,7 @@ public:
     Json get(const std::string& method, const std::string& data = "") {
         setParameters(method, data);
         auto response = session_.Get();
-        if (response.error) { throw std::runtime_error(response.error.message); }
+        if (response.is_error) { throw std::runtime_error(response.error_message); }
         auto json = Json::parse(response.text);
         checkResponse(method, json);
         return json;
@@ -213,7 +289,7 @@ private:
     void setParameters(const std::string& method, const std::string& data = "") {
         auto complete_url = "https://slack.com/api/" + method;
         session_.SetUrl(complete_url);
-        session_.SetBody(cpr::Body{data});
+        session_.SetBody(data);
 #if SLACKING_VERBOSE_OUTPUT
         std::cout << ">> sending: "<< complete_url << "  " << data << std::endl;
 #endif
@@ -241,7 +317,7 @@ private:
     }
 
 private:
-    cpr::Session    session_;
+    Session    session_;
 
 public:
     std::string      token_;
