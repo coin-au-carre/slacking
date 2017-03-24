@@ -31,20 +31,6 @@ Installation
 Just copy the `include/slacking` folder in your project and add `#include "slacking.hpp"`. That's all.  
 
 
-Requirements
-------------
-
-+ C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7) and GCC (4.9, 5).
-+ [Curl](https://curl.haxx.se/libcurl/) (which you probably already have).
-
-Note: *Slacking* uses the awesome ~~[C++ Requests](https://github.com/whoshuu/cpr) (CPR) and ~~ (not anymore !) [Nlohmann Json](https://github.com/nlohmann/json) which are already included in the project.
-
-Installation
-------------
-
-Just copy the `include/slacking` folder in your project and add `#include "slacking.hpp"`. That's all.  
-
-
 Example usage
 -------------
 
