@@ -27,7 +27,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-// #include <sstream>
+#include <sstream>
 
 #include <curl/curl.h>
 #include "json.hpp"  // nlohmann/json
@@ -248,7 +248,6 @@ std::string join(const std::vector<T>& vec, const std::string& sep = "&");
 
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 
-void replace_slack_escape_characters(std::string& str);
 
 
 class Slacking {
@@ -262,7 +261,7 @@ public:
     Slacking(const Slacking&)            = delete;
     Slacking& operator=(const Slacking&) = delete;
 
-    void reset_token(const std::string& token) { token_ = token; };
+    void change_token(const std::string& token) { token_ = token; };
     void set_throw_exception(bool throw_exception) { throw_exception_ = throw_exception; }
 
     void trigger_error(const std::string& msg) {
@@ -494,7 +493,7 @@ auto CategoryChannels::list_magic(bool exclude_archived) -> std::vector<Channel>
     auto users = std::vector<Channel>{};
     users.reserve(json_channels.size());
     for (auto channel : json_channels) {
-        users.push_back(Channel{channel["id"], channel["name"], channel["num_members"]});
+        users.emplace_back(channel["id"], channel["name"], channel["num_members"]);
     }
     return users;
 }
@@ -540,7 +539,7 @@ auto CategoryUsers::list_magic(bool presence) -> std::vector<User> {
         auto email = member["profile"].count("email") ? member["profile"]["email"].dump() : ""; // dump here because email can be null
         bool is_bot = true;
         if (member["is_bot"].is_boolean()) { is_bot = member["is_bot"]; }
-        users.push_back(User{member["id"], member["name"], email, member["profile"]["real_name"], presence, is_bot});
+        users.emplace_back(member["id"], member["name"], email, member["profile"]["real_name"], presence, is_bot);
     }
     return users;
 }
