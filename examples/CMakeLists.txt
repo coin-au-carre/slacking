@@ -33,7 +33,8 @@ foreach( name ${TARGETS_EXAMPLES} )
     if(NOT WIN32)
         target_link_libraries(${name} ${CURL_LIBRARIES})
     else()
-        target_link_libraries(${name} curl)
+        link_directories(${CMAKE_BINARY_DIR})
+        target_link_libraries(${name} curl) # for appveyor CI
     endif()
 endforeach()
 
