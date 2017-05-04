@@ -65,7 +65,7 @@ public:
     Response Get();
     Response Post();
     Response makeRequest();
-
+    std::string easyEscape(const std::string& text);
 
 private:
     static size_t writeFunction(void* ptr, size_t size, size_t nmemb, std::string* data) {
@@ -125,8 +125,11 @@ Response Session::makeRequest() {
     return { response_string, is_error, error_msg };
 }
 
-
-
+inline
+std::string Session::easyEscape(const std::string& text) {
+    char *encoded_output = curl_easy_escape(curl_, text.c_str(), text.length());
+    return std::string{encoded_output};
+}
 
 // forward declaration for category structures
 class  Slacking;
@@ -179,7 +182,7 @@ struct CategoryChat {
 
     CategoryChat(Slacking& slack) : slack_{slack} {}
 
-private:
+public: // exceptional for escape text (should be review)
     Slacking& slack_;
 };
 
@@ -300,6 +303,8 @@ public:
         elements.emplace_back("token", token_);
         return get(method, join(elements));
     }
+
+    std::string easyEscape(const std::string& text) { return session_.easyEscape(text); }
 
     void debug() const { std::cout << token_ << '\n'; }
 
@@ -508,8 +513,9 @@ inline
 Json CategoryChat::postMessage(const std::string& text, const std::string& specified_channel) {
     auto str_channel = specified_channel.empty() ? channel : specified_channel;
     if (str_channel.empty()) { throw std::runtime_error("channel is not set"); }
+    auto escaped_text = slack_.easyEscape(text);
     Json json_arguments = {
-        { "text"       , text           }, 
+        { "text"       , escaped_text   }, 
         { "channel"    , str_channel    }, 
         { "username"   , username       },
         { "icon_emoji" , icon_emoji     },
