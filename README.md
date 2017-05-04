@@ -6,7 +6,7 @@ Slacking - Lazy modern C++ people also loves Slack !
 Last update (March 2017) 
 ------------------------
 
-*Slacking* is much smaller. Now you only need two header files `include/slacking.hpp` and `include/json.hpp` in order to use *Slacking* ! [CPR](https://github.com/whoshuu/cpr) has been removed so you do not longer need it. All the curl work is directly integrated in `slacking.hpp`.
+*Slacking* is much smaller. Now you only need two header files `slacking.hpp` and `json.hpp` in order to use *Slacking* ! [CPR](https://github.com/whoshuu/cpr) has been removed so you do not longer need it. All the curl work is directly integrated in `slacking.hpp`.
 
 
 Simple C++ Slack API
@@ -136,7 +136,7 @@ Since *0.2*, you are now able to prevent throw exceptions. For instance, `slack:
 Ongoing work
 ------------
 
-You can use the `slack::post` or `slack::get` methods to fully exploit the [Slack Web API methods](https://api.slack.com/methods). You can refer to [examples/06-custom_post_get.cpp.cpp](examples/06-custom_post_get.cpp.cpp).
+You can use the `slack::post` or `slack::get` methods to fully exploit the [Slack Web API methods](https://api.slack.com/methods). You can refer to [examples/06-custom_post_get.cpp.cpp](examples/06-custom_post_get.cpp).
 
 Following C++ helpers free functions and member methods are available in *Slacking* for convenience :
 
