@@ -130,7 +130,7 @@ Since Slack::Json is a [nlohmann::json](https://github.com/nlohmann/json), you h
 
 By default, Slacking will throw a runtime error exception if the curl request does not succeed, if the response from Slack is not correct, or if `response["ok"]` received is not `true`. You are free to handle these exceptions the way you like.
 
-Since *0.2*, you are now able to prevent throw exceptions. For instance, `slack::create("xxx-xxx", false)` or `slack.set_throw_exception(false)` will disallow throw exception. You don't have to try catch `postMessage` for instance if you want to limit brutal stops in your program. 
+Since *0.2*, you are now able to prevent throw exceptions by setting `false` to these functions `slack::create("xxx-xxx", false)` or `slack.set_throw_exception(false)`. If you do that, a warning will be displayed and you won't have to try/catch every `postMessage` for instance if you want to avoid brutal stops in your program. 
 
 
 Ongoing work
@@ -160,11 +160,11 @@ Here are two approaches to keep alive the *Slacking* session in your program so 
 *Slacking* provides free convenient functions : `slack::create(const std::string& token)` and `slack::instance()`.
 Initialize the Slacking instance with:
 ```c++
-auto slack& = slack::create("xxx-xxx-xxx-xxx");
+auto& slack = slack::create("xxx-xxx-xxx-xxx");
 ```
 And when you are in another scope and you have lost the `slack` reference, you can grab it again with :  
 ```c++
-auto slack& = slack::instance();
+auto& slack = slack::instance();
 ```
 It might not be the recommended way but since we generally want to handle only one Slack instance (one token), it is highly convenient. You can refer to the example usage and  [examples/01-basic.cpp](examples/01-basic.cpp).
 
