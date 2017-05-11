@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <mutex>
 
 #include <curl/curl.h>
 #include "json.hpp"  // nlohmann/json
