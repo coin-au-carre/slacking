@@ -53,7 +53,7 @@ struct Response {
 // Simple curl Session inspired by CPR
 class Session {
 public:
-    Session() {
+    Session(bool throw_exception) : throw_exception_{throw_exception} {
         curl_global_init(CURL_GLOBAL_ALL);
         curl_ = curl_easy_init();
     }
@@ -77,6 +77,8 @@ private:
     CURL*       curl_;
     CURLcode    res_;
     std::string url_;
+    bool        throw_exception_;
+    std::mutex  mutex_request_;
 };
 
 inline
@@ -104,6 +106,7 @@ Response Session::Post() {
 
 inline
 Response Session::makeRequest() {
+    std::lock_guard<std::mutex> lock(mutex_request_);
     curl_easy_setopt(curl_, CURLOPT_URL, url_.c_str());
 
     std::string response_string;
@@ -117,9 +120,12 @@ Response Session::makeRequest() {
     bool is_error = false;
     std::string error_msg = "";
     if(res_ != CURLE_OK) {
-        // fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res_));
+        is_error = true;
         std::string error_msg = "curl_easy_perform() failed " + std::string{curl_easy_strerror(res_)};
-        throw std::runtime_error(error_msg);
+        if (throw_exception_) 
+            throw std::runtime_error(error_msg);
+        else 
+            std::cerr << "[slacking] curl_easy_perform() failed " << error_msg << '\n';
     }
 
     return { response_string, is_error, error_msg };
@@ -257,7 +263,7 @@ class Slacking {
 public:
     Slacking() = delete;
     Slacking(const std::string& token, bool throw_exception = true) 
-    : session_{}, token_{token}, throw_exception_{throw_exception} {
+    : session_{throw_exception}, token_{token}, throw_exception_{throw_exception} {
         session_.SetUrl("https://slack.com/api/");
     }
 
@@ -329,10 +335,11 @@ private:
             else {
                 if (json.count("error")) {
                     auto reason = json["error"].dump();
+                    // trigger_error(reason);
+                    std::cerr << "[slacking] warning! " << method << " checkResponse() failed " << reason << '\n';
 #if SLACKING_VERBOSE_OUTPUT
-                    std::cerr << "<< error! " << method << " call [failed] Reason given: " << reason << '\n';
+                    std::cerr << json << std::endl;
 #endif
-                    trigger_error(reason);
                 }
                 else {
                     trigger_error("checkResponse() unknown error.");
