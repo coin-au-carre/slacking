@@ -14,9 +14,13 @@ option(CURL_STATIC_LINKING
 if(CURL_STATIC_LINKING)
 add_definitions(-DCURL_STATICLIB)
 endif()
-  
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4")
- 
+
+if(NOT W32)  
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4")
+else()
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+endif()
+
 if ("${CMAKE_MAJOR_VERSION}${CMAKE_MINOR_VERSION}" LESS 31)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
@@ -35,6 +39,7 @@ set (SOURCES_EXAMPLES
     04-users.cpp
     05-channels.cpp
     06-custom_post_get.cpp
+	07-webhook.cpp
 	
 )
 
@@ -46,6 +51,7 @@ set (TARGETS_EXAMPLES
     04-users
     05-channels
     06-custom_post_get
+	07-webhook
 	
 )
 
