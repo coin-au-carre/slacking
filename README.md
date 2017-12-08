@@ -1,12 +1,7 @@
 Slacking - Lazy modern C++ people also loves Slack !
 ====================================================
 
-[![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)  [![Standard](https://img.shields.io/badge/c%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT) [![Build Status](https://travis-ci.org/coin-au-carre/slacking.svg?branch=master)](https://travis-ci.org/coin-au-carre/slacking) [![GitHub version](https://badge.fury.io/gh/coin-au-carre%2Fslacking.svg)](https://github.com/coin-au-carre/slacking/releases)
-
-Last update (March 2017) 
-------------------------
-
-*Slacking* is much smaller. Now you only need two header files `slacking.hpp` and `json.hpp` in order to use *Slacking* ! [CPR](https://github.com/whoshuu/cpr) has been removed so you do not longer need it. All the curl work is directly integrated in `slacking.hpp`.
+[![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)  [![Standard](https://img.shields.io/badge/c%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT) [![Build Status](https://travis-ci.org/coin-au-carre/slacking.svg?branch=master)](https://travis-ci.org/coin-au-carre/slacking) [![Build status](https://ci.appveyor.com/api/projects/status/9v928kd5cwd82pt9?svg=true)](https://ci.appveyor.com/project/coin-au-carre/slacking) [![GitHub version](https://badge.fury.io/gh/coin-au-carre%2Fslacking.svg)](https://github.com/coin-au-carre/slacking/releases)
 
 
 Simple C++ Slack API
@@ -30,7 +25,7 @@ Note: *Slacking*  uses [Nlohmann Json](https://github.com/nlohmann/json) which i
 Installation
 ------------
 
-Just copy the `include/slacking` folder in your project and add `#include "slacking.hpp"`. That's all.  
+Just copy the `include/slacking` folder in your project and you can `#include "slacking.hpp"` to your code. That's all.  
 
 
 Example usage
@@ -63,26 +58,26 @@ If you need maximum control, you can use the generic functions `slack::post` or 
 Everything available in [Web Slack API](https://api.slack.com/methods) is possible from here.
 ```c++
 slack::post (   
-                "chat.postMessage",
-                {
-                    {"text"      , "Slacking is awesome!" },
-                    {"channel"   , "#mychannel"           },
-                    {"username"  , "peach"                },
-                    {"icon_emoji", ":princess:"           }
-                } // note that "token" is not needed here and is a "registered" parameter
-            ); // it is automatically inserted when using slack::post()
+    "chat.postMessage",
+    {
+        {"text"      , "Slacking is awesome!" },
+        {"channel"   , "#mychannel"           },
+        {"username"  , "peach"                },
+        {"icon_emoji", ":princess:"           }
+    } // note that "token" is not needed here and is a "registered" parameter
+); // it is automatically inserted when using slack::post()
 ```
 
 
 #### Sending complex messages (JSON approach) ([preview](https://goo.gl/GLrlT2))
 
-If you prefer to mimic the Json approach given in the API, you can also use this syntax: 
+If you prefer to mimic the JSON approach given in the API, you can also use this syntax: 
 ```c++
  auto json = R"({
-    "text": "But Our Princess is in Another Castle!",
-    "channel" : "#general",
-    "username": "peach",
-    "icon_emoji": ":princess:"
+    "text":         "But Our Princess is in Another Castle!",
+    "channel":      "#general",
+    "username":     "peach",
+    "icon_emoji":   ":princess:"
 })"_json;
 
 slack::post("chat.postMessage", json);
@@ -118,12 +113,12 @@ std::cout << response << std::endl;
 
 [![Slacking attachments](doc/showcase_attachments.png?raw=true "Slacking attachments")](https://www.youtube.com/watch?v=ND-TuW0KIgg)
 
-The output is a JSON response sent back by Slack:
+The output received is a JSON response sent back by the Slack API:
 ```
 {"channel":"C1AUF9AN4","message":{"attachments":[{"color":"7CD197","fallback":"New ticket from Bjarne Stroustrup - Ticket #2017: Still looking for reflection","id":1,"image_bytes":4820,"image_height":90,"image_url":"https://img.youtube.com/vi/ND-TuW0KIgg/2.jpg","image_width":120,"pretext":"New ticket from Bjarne Stroustrup","text":"Help me adding reflection!","title":"Ticket #2017: Still looking for reflection","title_link":"https://www.youtube.com/watch?v=ND-TuW0KIgg"}],"bot_id":"B20LJ4Y12","icons":{"emoji":":hamster:","image_64":"https://slack.global.ssl.fastly.net/d4bf/img/emoji_2015_2/apple/1f439.png"},"subtype":"bot_message","text":" ","ts":"1464251666.000063","type":"message","username":"Support Bot"},"ok":true,"ts":"1464251666.000063"}
 ```
 
-Since Slack::Json is a [nlohmann::json](https://github.com/nlohmann/json), you have all the features of the latter one (conversions, STL like access, ...). For instance, `response["ok"]` will give `true`.
+Since Slack::Json is a typedef to a [nlohmann::json](https://github.com/nlohmann/json), you have all the features of the latter one (conversions, STL like access, ...). For instance, `response["ok"]` will give `true`.
 
 
 #### A word about error handling

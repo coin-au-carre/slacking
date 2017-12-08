@@ -82,12 +82,11 @@ public:
         curl_global_init(CURL_GLOBAL_ALL);
         curl_ = curl_easy_init();
     }
-	Session(bool throw_exception, std::string proxy_url) : throw_exception_{ throw_exception } {
-		
-		curl_global_init(CURL_GLOBAL_ALL);
-		curl_ = curl_easy_init();
-		SetProxyUrl(proxy_url);
-	}
+    Session(bool throw_exception, std::string proxy_url) : throw_exception_{ throw_exception } {
+        curl_global_init(CURL_GLOBAL_ALL);
+        curl_ = curl_easy_init();
+        SetProxyUrl(proxy_url);
+    }
     ~Session() { curl_easy_cleanup(curl_); }
 
     void SetUrl(const std::string& url) { url_ = url;   }
@@ -97,11 +96,10 @@ public:
 		token_ = token;
 	}
  
-	void SetProxyUrl(const std::string& url){
-	 
-		proxy_url_ = url; 
-		if (nullptr != curl_)   curl_easy_setopt(curl_, CURLOPT_PROXY, proxy_url_.c_str());
-	}
+    void SetProxyUrl(const std::string& url) {
+        proxy_url_ = url; 
+        if (nullptr != curl_)   curl_easy_setopt(curl_, CURLOPT_PROXY, proxy_url_.c_str());
+    }
 
     void SetBody(const std::string& data);
     Response Get();
@@ -119,8 +117,8 @@ private:
     CURL*       curl_;
     CURLcode    res_;
     std::string url_;
-	std::string proxy_url_;
-	std::string token_;
+    std::string proxy_url_;
+    std::string token_;
 
     bool        throw_exception_;
     std::mutex  mutex_request_;
@@ -163,8 +161,8 @@ Response Session::makeRequest() {
 	//-------- set our custom set of headers------------------------------  
 
     curl_easy_setopt(curl_, CURLOPT_URL, url_.c_str());
-	
-	std::string response_string;
+    
+    std::string response_string;
     std::string header_string;
     curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, writeFunction);
     curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &response_string);
@@ -349,17 +347,16 @@ public:
     Slacking() = delete;
     Slacking(const std::string& token, bool throw_exception = true) 
     : session_{throw_exception}, token_{token}, throw_exception_{throw_exception}
-	{
+    {
         session_.SetUrl("https://slack.com/api/");
-		session_.SetToken(token_);
-	 
+        session_.SetToken(token_);
     }
-	 
+     
 
     Slacking(const Slacking&)            = delete;
     Slacking& operator=(const Slacking&) = delete;
 
-	void set_proxy(const std::string& url) { session_.SetProxyUrl(url); }
+    void set_proxy(const std::string& url) { session_.SetProxyUrl(url); }
 
 
     void change_token(const std::string& token) { token_ = token; };
@@ -443,7 +440,7 @@ private:
 
     void setParameters(const std::string& method, const std::string& data = "") {
         auto complete_url =  baseURL+ method;
-		session_.SetUrl(complete_url);
+		    session_.SetUrl(complete_url);
         session_.SetBody(data);
 
 
