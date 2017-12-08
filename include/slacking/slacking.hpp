@@ -51,6 +51,30 @@ struct Response {
     std::string error_message;
 };
 
+class curl_header
+{
+public: 
+    curl_header(CURL *curl) {
+
+        curl_ = curl;
+    }
+    void append(std::string header) {
+        
+        element = curl_slist_append(element, header.c_str());
+
+        CURLcode rc = curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, element);
+    }
+
+    ~curl_header()  {
+        // free the custom headers  
+        curl_slist_free_all(element);
+    }
+private:
+    CURL *curl_=nullptr;
+    struct curl_slist *element = nullptr;
+
+};
+
 // Simple curl Session inspired by CPR
 class Session {
 public:
@@ -66,6 +90,11 @@ public:
     ~Session() { curl_easy_cleanup(curl_); }
 
     void SetUrl(const std::string& url) { url_ = url;   }
+
+    void SetToken(const std::string &token)
+    {
+        token_ = token;
+    }
  
     void SetProxyUrl(const std::string& url) {
         proxy_url_ = url; 
@@ -89,6 +118,7 @@ private:
     CURLcode    res_;
     std::string url_;
     std::string proxy_url_;
+    std::string token_;
 
     bool        throw_exception_;
     std::mutex  mutex_request_;
@@ -120,6 +150,16 @@ Response Session::Post() {
 inline
 Response Session::makeRequest() {
     std::lock_guard<std::mutex> lock(mutex_request_);
+    
+    //------ set our custom set of headers
+    // for  using incoming webhook it is mandatory to set 
+    // "Content-Type: application/x-www-form-urlencoded" in header
+
+    curl_header  header(curl_);
+    header.append("Content-Type: application/x-www-form-urlencoded");
+    
+    //-------- set our custom set of headers------------------------------  
+
     curl_easy_setopt(curl_, CURLOPT_URL, url_.c_str());
     
     std::string response_string;
@@ -141,12 +181,14 @@ Response Session::makeRequest() {
             std::cerr << "[slacking] curl_easy_perform() failed " << error_msg << '\n';
     }
 
+    
+
     return { response_string, is_error, error_msg };
 }
 
 inline
 std::string Session::easyEscape(const std::string& text) {
-    char *encoded_output = curl_easy_escape(curl_, text.c_str(), text.length());
+    char *encoded_output = curl_easy_escape(curl_, text.c_str(), static_cast<int>(text.length()));
     return std::string{encoded_output};
 }
 
@@ -168,6 +210,8 @@ struct CategoryApi {
 private:
     Slacking& slack_;
 };
+
+
 
 
 struct CategoryChannels {
@@ -204,6 +248,27 @@ struct CategoryChat {
 public: // exceptional for escape text (should be review)
     Slacking& slack_;
 };
+
+
+
+struct CategoryWebHook {
+    std::string channel{};      // optional
+    std::string username{};     // optional
+    std::string icon_emoji{};   // optional
+    std::string Id{};           // required 
+
+    void channel_username_iconemoji(const std::string& c, const std::string& u, const std::string& i) {
+        channel = c; username = u; icon_emoji = i;
+    }
+
+    Json postMessage(const std::string& text = " ", const std::string& specified_channel = "");
+    
+    CategoryWebHook(Slacking& slack) : slack_{ slack } {}
+
+private:
+    Slacking& slack_;
+};
+ 
 
 
 struct CategoryUsers {
@@ -279,7 +344,7 @@ public:
     : session_{throw_exception}, token_{token}, throw_exception_{throw_exception}
     {
         session_.SetUrl("https://slack.com/api/");
-     
+        session_.SetToken(token_);
     }
      
 
@@ -302,9 +367,22 @@ public:
     Json post(const std::string& method, const std::string& data = "") {
         setParameters(method, data);
         auto response = session_.Post();
-        if (response.is_error) { trigger_error(response.error_message); }
-        auto json = Json::parse(response.text);
-        checkResponse(method, json);
+        if (response.is_error){ 
+            trigger_error(response.error_message);
+        }
+
+        Json json{};
+        if (isJson(response.text)){
+
+            json = Json::parse(response.text); 
+            checkResponse(method, json);
+        }
+        else{
+          #if SLACKING_VERBOSE_OUTPUT
+            std::cout << "<< " << response.text << "\n";
+          #endif
+        }
+       
         return json;
     }
 
@@ -312,12 +390,22 @@ public:
         setParameters(method, data);
         auto response = session_.Get();
         if (response.is_error) { trigger_error(response.error_message); }
-        auto json = Json::parse(response.text);
-        checkResponse(method, json);
+
+        Json json{};
+        if (isJson(response.text)) {
+            json = Json::parse(response.text);
+            checkResponse(method, json);
+        }
+        else{
+          #if SLACKING_VERBOSE_OUTPUT
+            std::cout << "<< " << response.text<< "\n";
+          #endif
+        }
         return json;
     }
 
     Json post(const std::string& method, const Json& json) {
+        
         auto elements = json_to_elements(json);
         elements.emplace_back("token", token_);
         return post(method, join(elements));
@@ -333,14 +421,25 @@ public:
 
     void debug() const { std::cout << token_ << '\n'; }
 
+    void setBaseUrl(const std::string &url) {
+        base_url = url;
+    }
+
+    std::string getBaseUrl() const {
+        return base_url;
+    }
 private:
+    std::string base_url{ "https://slack.com/api/" };
+
     void setParameters(const std::string& method, const std::string& data = "") {
-        auto complete_url = "https://slack.com/api/" + method;
+        auto complete_url =  base_url+ method;
         session_.SetUrl(complete_url);
         session_.SetBody(data);
+
 #if SLACKING_VERBOSE_OUTPUT
         std::cout << ">> sending: "<< complete_url << "  " << data << '\n';
 #endif
+
     }
 
     void checkResponse(const std::string& method, const Json& json) {
@@ -367,6 +466,17 @@ private:
         }
     }
 
+    // as of now the only way
+    bool isJson(const std::string &data){
+        bool rc = true;
+        try {
+            auto json = Json::parse(data); // throws if no json 
+        }
+        catch (std::exception &){
+            rc = false;
+        }
+        return(rc);
+    }
 private:
     Session    session_;
 
@@ -377,6 +487,7 @@ public:
     CategoryChannels    channels{*this};
     CategoryChat        chat    {*this};
     CategoryUsers       users   {*this};
+    CategoryWebHook     hook    {*this};
 };
 
 inline 
@@ -537,6 +648,8 @@ Json CategoryChannels::info(const std::string& channel_id) {
     return json["channel"];
 }
 
+ 
+
 inline
 Json CategoryChat::postMessage(const std::string& text, const std::string& specified_channel) {
     auto str_channel = specified_channel.empty() ? channel : specified_channel;
@@ -553,6 +666,26 @@ Json CategoryChat::postMessage(const std::string& text, const std::string& speci
     };
     auto json = slack_.post("chat.postMessage", json_arguments);
     attachments = Json{};
+    return json;
+}
+
+inline Json CategoryWebHook::postMessage(const std::string& text,
+                                         const std::string& specified_channel) {
+    auto str_channel = specified_channel.empty() ? channel : specified_channel;
+
+    Json json_arguments = {{"text", text}, {"channel", str_channel}};
+
+    // in this case we did not use  Slack web api
+    std::string baseUrl = slack_.getBaseUrl();
+    slack_.setBaseUrl("https://hooks.slack.com/services/");
+
+    //  webhooks are used with "Content-Type: application/x-www-form-urlencoded" style
+    //  this needs  an escaped payload tag  in  the body
+    std::string hookPayload =  "payload=" + slack_.easyEscape(json_arguments.dump());    
+
+    auto  json = slack_.post(Id, hookPayload);
+
+    slack_.setBaseUrl(baseUrl);
     return json;
 }
 
