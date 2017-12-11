@@ -17,11 +17,7 @@ if(CURL_STATIC_LINKING)
 add_definitions(-DCURL_STATICLIB)
 endif()
 
-if(NOT W32)  
- set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4")
-else()
- set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-endif()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 if ("${CMAKE_MAJOR_VERSION}${CMAKE_MINOR_VERSION}" LESS 31)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")

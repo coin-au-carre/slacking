@@ -51,26 +51,26 @@ struct Response {
     std::string error_message;
 };
 
-class curl_header
-{
+
+class curl_header {
 public: 
     curl_header(CURL *curl) {
-
         curl_ = curl;
     }
     void append(std::string header) {
         
         element = curl_slist_append(element, header.c_str());
 
-        CURLcode rc = curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, element);
+        /* CURLcode rc = curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, element); */
     }
 
     ~curl_header()  {
         // free the custom headers  
         curl_slist_free_all(element);
     }
+    
 private:
-    CURL *curl_=nullptr;
+    CURL *curl_ = nullptr;
     struct curl_slist *element = nullptr;
 
 };
