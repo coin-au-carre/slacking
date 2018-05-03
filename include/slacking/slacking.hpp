@@ -672,6 +672,7 @@ Json CategoryChat::postMessage(const std::string& text, const std::string& speci
 inline Json CategoryWebHook::postMessage(const std::string& text,
                                          const std::string& specified_channel) {
     auto str_channel = specified_channel.empty() ? channel : specified_channel;
+    auto str_emoji = icon_emoji.empty()? "" : icon_emoji;
 
     Json json_arguments = {{"text", text}, {"channel", str_channel}};
 
