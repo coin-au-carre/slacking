@@ -674,7 +674,7 @@ inline Json CategoryWebHook::postMessage(const std::string& text,
     auto str_channel = specified_channel.empty() ? channel : specified_channel;
     auto str_emoji = icon_emoji.empty()? "" : icon_emoji;
 
-    Json json_arguments = {{"text", text}, {"channel", str_channel}};
+    Json json_arguments = {{"text", text}, {"channel", str_channel},{ "icon_emoji" , str_emoji} };
 
     // in this case we did not use  Slack web api
     std::string baseUrl = slack_.getBaseUrl();
