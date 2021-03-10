@@ -30,12 +30,16 @@
 #include <sstream>
 #include <mutex>
 
-#include <curl/curl.h>
+#ifndef CURL_STATICLIB
+# include <curl/curl.h>
+#else 
+# include "curl/curl.h"
+#endif
+
 #include "json.hpp"  // nlohmann/json
 
- 
-#ifndef  SLACKING_VERBOSE_OUTPUT
-# define SLACKING_VERBOSE_OUTPUT  0
+#if SLACKING_VERBOSE_OUTPUT
+# pragma message ("SLACKING_VERBOSE_OUTPUT is ON")
 #endif
 
 namespace slack {
@@ -171,17 +175,15 @@ Response Session::makeRequest() {
     res_ = curl_easy_perform(curl_);
 
     bool is_error = false;
-    std::string error_msg = "";
+    std::string error_msg{};
     if(res_ != CURLE_OK) {
         is_error = true;
-        std::string error_msg = "curl_easy_perform() failed " + std::string{curl_easy_strerror(res_)};
+        error_msg = "curl_easy_perform() failed " + std::string{curl_easy_strerror(res_)};
         if (throw_exception_) 
             throw std::runtime_error(error_msg);
         else 
             std::cerr << "[slacking] curl_easy_perform() failed " << error_msg << '\n';
     }
-
-    
 
     return { response_string, is_error, error_msg };
 }
@@ -661,8 +663,8 @@ Json CategoryChat::postMessage(const std::string& text, const std::string& speci
         { "username"   , username       },
         { "icon_emoji" , icon_emoji     },
         { "parse"      , parse          },
-        { "attachments", attachments    },
-        { "as_user"    , bool_to_string(as_user) }
+        { "attachments", attachments    }
+        // { "as_user"    , bool_to_string(as_user) } // DEPRECATED!
     };
     auto json = slack_.post("chat.postMessage", json_arguments);
     attachments = Json{};
@@ -703,11 +705,13 @@ auto CategoryUsers::list_magic(bool presence) -> std::vector<User> {
     auto users = std::vector<User>{};
     users.reserve(json_members.size());
     for (auto member : json_members) {
-        auto presence = member.count("presence") ? member["presence"] : "";
+        auto presence_json = member.count("presence") ? member["presence"] : "";
         auto email = member["profile"].count("email") ? member["profile"]["email"].dump() : ""; // dump here because email can be null
         bool is_bot = true;
-        if (member["is_bot"].is_boolean()) { is_bot = member["is_bot"]; }
-        users.emplace_back(member["id"], member["name"], email, member["profile"]["real_name"], presence, is_bot);
+        if (member["is_bot"].is_boolean()) { 
+            is_bot = member["is_bot"]; 
+        }
+        users.emplace_back(member["id"], member["name"], email, member["profile"]["real_name"], presence_json, is_bot);
     }
     return users;
 }
