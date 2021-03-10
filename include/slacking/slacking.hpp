@@ -1,9 +1,9 @@
-#ifndef SLACKING_HPP_
-#define SLACKING_HPP_
+// Slacking, a modern C++ 11 library for communicating with the Web Slack API
+// https://github.com/coin-au-carre/slacking
 
 // The MIT License (MIT)
 // 
-// Copyright (c) 2016, 2017 Florian Dang
+// Copyright (c) 2016 Florian Dang
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#ifndef SLACKING_HPP_
+#define SLACKING_HPP_
+
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -37,6 +40,7 @@
 #endif
 
 #include "json.hpp"  // nlohmann/json
+
 
 #if SLACKING_VERBOSE_OUTPUT
 # pragma message ("SLACKING_VERBOSE_OUTPUT is ON")
@@ -214,8 +218,6 @@ private:
 };
 
 
-
-
 struct CategoryChannels {
     Json list(bool exclude_archived = false);
     std::vector<Channel> list_magic(bool exclude_archived = false);
@@ -338,7 +340,6 @@ std::string join(const std::vector<T>& vec, const std::string& sep = "&");
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 
 
-
 class Slacking {
 public:
     Slacking() = delete;
@@ -363,7 +364,7 @@ public:
         if (throw_exception_) 
             throw std::runtime_error(msg);
         else 
-            std::cerr << "[slacking] error " << msg << '\n';
+            std::cerr << "[slacking] error. Reason: " << msg << '\n';
     }
 
     Json post(const std::string& method, const std::string& data = "") {
@@ -455,10 +456,9 @@ private:
             else {
                 if (json.count("error")) {
                     auto reason = json["error"].dump();
-                    // trigger_error(reason);
-                    std::cerr << "[slacking] warning! " << method << " checkResponse() failed " << reason << '\n';
+                    trigger_error(reason);
 #if SLACKING_VERBOSE_OUTPUT
-                    std::cerr << json << std::endl;
+                    std::cerr << "<< checkResponse() error details: " << json << std::endl;
 #endif
                 }
                 else {
@@ -570,14 +570,11 @@ std::ostream& operator<<(std::ostream &os, const std::vector<T>& vec) {
     return os << "\b\n]";
 }
 
-
 inline
 Slacking& create(const std::string& token, bool throw_exception = true)  {
     static Slacking instance(token, throw_exception);
     return instance;
 }
-
-
 
 inline
 Slacking& instance() {
@@ -649,8 +646,6 @@ Json CategoryChannels::info(const std::string& channel_id) {
     auto json = slack_.post("channels.info", {{"channel", channel_id}});
     return json["channel"];
 }
-
- 
 
 inline
 Json CategoryChat::postMessage(const std::string& text, const std::string& specified_channel) {

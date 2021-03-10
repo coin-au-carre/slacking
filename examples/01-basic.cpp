@@ -8,7 +8,7 @@ int main() {
     std::ifstream infile("token.txt");
     std::getline(infile, mytoken);
     {
-        // Create an Slacking instance. The token must be fill and will be remembered. 
+        // Create a Slacking instance. The token must be filled and will be remembered as long as the instances lives (here until the end)
         slack::create(mytoken);
     }
 
@@ -40,13 +40,13 @@ int main() {
         slack::chat().as_user = true; // see as_user documentation it will override username here
 
         // We can also send via helper free function
-        slack::chat().postMessage("Hello @bob please join #general!");
+        slack::chat().postMessage("Hello @Coincoin please join #general!");
 
         try {
-            slack::instance().chat.postMessage("Hello there in another chanel!", "#otherchannel");
+            slack::instance().chat.postMessage("Hello there in another channel!", "#otherchannel");    
         }
         catch(std::exception const& e) {
-            std::cerr << "channel might not exist: " << e.what() << '\n'; // yep we can try/catch slacking methods
+            std::cerr << "channel '#otherchannel' might not exist: " << e.what() << '\n'; // We can try/catch slacking methods
         }
     }
 
@@ -54,6 +54,4 @@ int main() {
         auto users = slack::users().list();
         std::cout << users.dump(2) << '\n'; // will display users list information
     }
-
 }
-
