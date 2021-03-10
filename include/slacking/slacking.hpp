@@ -38,9 +38,8 @@
 
 #include "json.hpp"  // nlohmann/json
 
-#ifndef  SLACKING_VERBOSE_OUTPUT
+#if SLACKING_VERBOSE_OUTPUT
 # pragma message ("SLACKING_VERBOSE_OUTPUT ON")
-# define SLACKING_VERBOSE_OUTPUT  0
 #else 
 # pragma message ("SLACKING_VERBOSE_OUTPUT OFF")
 #endif
@@ -666,8 +665,8 @@ Json CategoryChat::postMessage(const std::string& text, const std::string& speci
         { "username"   , username       },
         { "icon_emoji" , icon_emoji     },
         { "parse"      , parse          },
-        { "attachments", attachments    },
-        { "as_user"    , bool_to_string(as_user) }
+        { "attachments", attachments    }
+        // { "as_user"    , bool_to_string(as_user) } // DEPRECATED!
     };
     auto json = slack_.post("chat.postMessage", json_arguments);
     attachments = Json{};

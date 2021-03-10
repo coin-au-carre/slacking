@@ -192,11 +192,18 @@ You might have difficulties handling libcurl where CMake throws `Could NOT find 
 
 One way to solve this is to grab the curl version for Windows [here](https://curl.se/windows/), copy the content of `include`
 in appropriate folders available visible in your PATH (e.g. if in your Git installation `[...]/Git/mingw64/include/`).
-You also need to grab the `curl.lib` file from [here](https://dl.dropboxusercontent.com/s/jxwohqax4e2avyt/libcurl-7.48.0-WinSSL-zlib-x86-x64.zip?dl=0) and copy it in `lib/` folder (e.g. if in your Git installation `[...]/Git/mingw64/lib/`).
+You also need to grab the `curl.lib` and the `libcurl.dll` files from [here](https://dl.dropboxusercontent.com/s/jxwohqax4e2avyt/libcurl-7.48.0-WinSSL-zlib-x86-x64.zip?dl=0) and copy them in appropriate folders (e.g. if in your Git installation `[...]/Git/mingw64/lib/`).
 
 ```bash
 mkdir build && cd build
-cmake .. -DCMAKE_GENERATOR_PLATFORM=x64 -DCURL_STATIC_LINKING=ON
+cmake .. -DCMAKE_GENERATOR_PLATFORM=x64
 cmake --build .
 cmake --build . --target 00-showcase # For a specific target
+```
+
+Or if you prefer using GNU GCC on Windows
+
+```bash
+cmake -G "MSYS Makefiles" -D CMAKE_CXX_COMPILER=g++ ..
+make
 ```
