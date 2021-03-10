@@ -1,61 +1,56 @@
-Slacking - Lazy modern C++ people also loves Slack !
-====================================================
+# Slacking - Send easily messages in Slack with C++
 
 [![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)  [![Standard](https://img.shields.io/badge/c%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT) [![Build Status](https://travis-ci.org/coin-au-carre/slacking.svg?branch=master)](https://travis-ci.org/coin-au-carre/slacking) [![Build status](https://ci.appveyor.com/api/projects/status/9v928kd5cwd82pt9?svg=true)](https://ci.appveyor.com/project/coin-au-carre/slacking) [![GitHub version](https://badge.fury.io/gh/coin-au-carre%2Fslacking.svg)](https://github.com/coin-au-carre/slacking/releases)
 
-
-Simple C++ Slack API
---------------------
+## Simple C++ Slack API
 
 *Slacking* is a lightweight **C++11 header only library** (only two header files !) for communicating with the [Slack Web API](https://api.slack.com/web).  
 *Slacking* aims to be easy to use and stick to the API style proposed by Slack. *Slacking* requires to have an [API token](https://api.slack.com/docs/oauth-test-tokens).
 
-
-Requirements
-------------
+## Requirements
 
 No special requirement. You should already have these :
 
-+ C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7) and GCC (4.9, 5).
-+ [libcurl](https://curl.haxx.se/libcurl/) (which you probably already have).
++ C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7), GCC (4.9, 5), MSCV (VS 14 2015, VS 15 2017)
++ [libcurl](https://curl.se/libcurl/) (which you probably already have. For Windows user check  )
 
 Note: *Slacking*  uses [Nlohmann Json](https://github.com/nlohmann/json) which is available in `include/json.hpp`
 
-
-Installation
-------------
+## Installation
 
 Just copy the `include/slacking` folder in your project and you can `#include "slacking.hpp"` to your code. That's all.  
 
+## Example usage
 
-Example usage
--------------
+### Initialize a slack instance
 
-#### Initialize a slack instance
 ```c++
 auto& slack = slack::create("xxx-xxx-xxx-xxx"); // "xxx-xxx-xxx-xxx" is your Slack API token
 slack.chat.channel = "#general"; // set a default channel
 ```
 
-#### Sending a message in Slack is easy ([preview](https://goo.gl/GC9w3p))
+### Sending a message in Slack is easy ([preview](https://goo.gl/GC9w3p))
 
 ```c++
 slack.chat.postMessage("Hello there!"); // will send the message "Hello there!" in the channel #general with the registered token
 ```
+
 Note that we try to stick with the Slack API documentation: the __chat.postMessage__ syntax is easily recognizable.
 
-#### Sending a message with a specified channel, username and icon ([preview](https://goo.gl/1UhzpM))
+### Sending a message with a specified channel, username and icon ([preview](https://goo.gl/1UhzpM))
 
 ```c++
 slack.chat.channel_username_iconemoji("#superchannel", "Ghost Bot", ":ghost:");
 slack.chat.postMessage("Slacking is simple"); // will send the message "Hello there!" in the channel #general with the registered token
 ```
-Note that theses changes are persistent inside the slack instance. 
 
-#### Sending complex messages (functionnal approach) ([preview](https://goo.gl/GLrlT2))
+Note that theses changes are persistent inside the slack instance.
+
+### Sending complex messages (functionnal approach) ([preview](https://goo.gl/GLrlT2))
 
 If you need maximum control, you can use the generic functions `slack::post` or `slack::get`.  
 Everything available in [Web Slack API](https://api.slack.com/methods) is possible from here.
+
 ```c++
 slack::post (   
     "chat.postMessage",
@@ -68,10 +63,10 @@ slack::post (
 ); // it is automatically inserted when using slack::post()
 ```
 
+### Sending complex messages (JSON approach) ([preview](https://goo.gl/GLrlT2))
 
-#### Sending complex messages (JSON approach) ([preview](https://goo.gl/GLrlT2))
+If you prefer to mimic the JSON approach given in the API, you can also use this syntax:
 
-If you prefer to mimic the JSON approach given in the API, you can also use this syntax: 
 ```c++
  auto json = R"({
     "text":         "But Our Princess is in Another Castle!",
@@ -85,9 +80,7 @@ slack::post("chat.postMessage", json);
 
 Check out the [examples](examples/) for more illustrations.  
 
-
-A more elaborated example ([preview](https://goo.gl/syHOka))
--------------------------
+### A more elaborated example ([preview](https://goo.gl/syHOka))
 
 You can make richly-formated messages with [attachments](https://api.slack.com/docs/attachments).
 
@@ -121,15 +114,14 @@ The output received is a JSON response sent back by the Slack API:
 Since Slack::Json is a typedef to a [nlohmann::json](https://github.com/nlohmann/json), you have all the features of the latter one (conversions, STL like access, ...). For instance, `response["ok"]` will give `true`.
 
 
-#### A word about error handling
+## A word about error handling
 
 By default, Slacking will throw a runtime error exception if the curl request does not succeed, if the response from Slack is not correct, or if `response["ok"]` received is not `true`. You are free to handle these exceptions the way you like.
 
-Since *0.2*, you are now able to prevent throw exceptions by setting `false` to these functions `slack::create("xxx-xxx", false)` or `slack.set_throw_exception(false)`. If you do that, a warning will be displayed and you won't have to try/catch every `postMessage` for instance if you want to avoid brutal stops in your program. 
+Since *0.2*, you are now able to prevent throw exceptions by setting `false` to these functions `slack::create("xxx-xxx", false)` or `slack.set_throw_exception(false)`. If you do that, a warning will be displayed and you won't have to try/catch every `postMessage` for instance if you want to avoid brutal stops in your program.
 
+## Ongoing work
 
-Ongoing work
-------------
 
 You can use the `slack::post` or `slack::get` methods to fully exploit the [Slack Web API methods](https://api.slack.com/methods). You can refer to [examples/06-custom_post_get.cpp.cpp](examples/06-custom_post_get.cpp).
 
@@ -145,25 +137,28 @@ This is an ongoing work so more convenient helpers functions and structures migh
 If you need any features feel free to ask and contribute.
 
 
-Manage Slacking instance
-------------------------
+## Manage Slacking instance
 
 Here are two approaches to keep alive the *Slacking* session in your program so you can use it anytime, anywhere.
 
-#### Use Meyers singleton
+### Use Meyers singleton
 
 *Slacking* provides free convenient functions : `slack::create(const std::string& token)` and `slack::instance()`.
 Initialize the Slacking instance with:
+
 ```c++
 auto& slack = slack::create("xxx-xxx-xxx-xxx");
 ```
+
 And when you are in another scope and you have lost the `slack` reference, you can grab it again with :  
+
 ```c++
 auto& slack = slack::instance();
 ```
+
 It might not be the recommended way but since we generally want to handle only one Slack instance (one token), it is highly convenient. You can refer to the example usage and  [examples/01-basic.cpp](examples/01-basic.cpp).
 
-#### Pass by reference (or by pointer)
+### Pass by reference (or by pointer)
 
 An other approach is to pass the *Slacking* instance by reference, store it, and call the appropriate methods when needed.
 
@@ -180,9 +175,9 @@ int main() {
 
 You can use a [std::reference_wrapper](http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper) as shown in [examples/02-basic.cpp](examples/02-basic.cpp). This strategy is useful if you have to manage several Slacking instances.
 
-### Build the examples
+## Build the examples
 
-```
+```bash
 mkdir build && cd build
 cmake .. && make
 examples/[whatever]
@@ -190,3 +185,18 @@ examples/[whatever]
 
 In your project, if you want a verbose output like when running the examples, add the following compilation flag:  
 `-DSLACKING_VERBOSE_OUTPUT=1`.
+
+### Note for Windows users
+
+You might have difficulties handling libcurl where CMake throws `Could NOT find CURL (missing: CURL_LIBRARY CURL_INCLUDE_DIR)`.
+
+One way to solve this is to grab the curl version for Windows [here](https://curl.se/windows/), copy the content of `include`
+in appropriate folders available visible in your PATH (e.g. if in your Git installation `[...]/Git/mingw64/include/`).
+You also need to grab the `curl.lib` file from [here](https://dl.dropboxusercontent.com/s/jxwohqax4e2avyt/libcurl-7.48.0-WinSSL-zlib-x86-x64.zip?dl=0) and copy it in `lib/` folder (e.g. if in your Git installation `[...]/Git/mingw64/lib/`).
+
+```bash
+mkdir build && cd build
+cmake .. -DCMAKE_GENERATOR_PLATFORM=x64 -DCURL_STATIC_LINKING=ON
+cmake --build .
+cmake --build . --target 00-showcase # For a specific target
+```

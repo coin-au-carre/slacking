@@ -30,12 +30,19 @@
 #include <sstream>
 #include <mutex>
 
-#include <curl/curl.h>
+#ifndef CURL_STATICLIB
+# include <curl/curl.h>
+#else 
+# include "curl/curl.h"
+#endif
+
 #include "json.hpp"  // nlohmann/json
 
- 
 #ifndef  SLACKING_VERBOSE_OUTPUT
+# pragma message ("SLACKING_VERBOSE_OUTPUT ON")
 # define SLACKING_VERBOSE_OUTPUT  0
+#else 
+# pragma message ("SLACKING_VERBOSE_OUTPUT OFF")
 #endif
 
 namespace slack {
