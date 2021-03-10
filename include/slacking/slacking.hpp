@@ -39,9 +39,7 @@
 #include "json.hpp"  // nlohmann/json
 
 #if SLACKING_VERBOSE_OUTPUT
-# pragma message ("SLACKING_VERBOSE_OUTPUT ON")
-#else 
-# pragma message ("SLACKING_VERBOSE_OUTPUT OFF")
+# pragma message ("SLACKING_VERBOSE_OUTPUT is ON")
 #endif
 
 namespace slack {

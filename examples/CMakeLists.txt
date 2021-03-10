@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project(examples)
 
-# Comment/Uncomment this line if you wish to have slacking display
-add_definitions(-DSLACKING_VERBOSE_OUTPUT=1)
+# You can comment/Uncomment this line if you wish to have slacking display
+# add_definitions(-DSLACKING_VERBOSE_OUTPUT=1)
 
 # option(SLACKING_VERBOSE_OUTPUT "If you wish to have slacking display"  OFF)
 option(CURL_STATIC_LINKING "Set to ON to build libcurl with static linking."  OFF)

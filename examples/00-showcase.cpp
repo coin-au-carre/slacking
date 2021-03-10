@@ -29,7 +29,7 @@ void more_elaborate_example() {
 int main() {
     std::cout << "Slacking starting" << std::endl;
 
-    auto& slack = slack::create("xoxb-1843907906290-1856554650241-UBmRy7K4Yzumd2M1eYehUKaq"); // where "xxx-xxx" is your Slack API token
+    auto& slack = slack::create("xxx-xxx"); // where "xxx-xxx" is your Slack API token
 
     slack.set_throw_exception(false); // feel free to disable exception (true by default)
 
