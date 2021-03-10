@@ -91,7 +91,7 @@ public:
         curl_ = curl_easy_init();
         SetProxyUrl(proxy_url);
     }
-    ~Session() { curl_easy_cleanup(curl_); }
+    ~Session() { curl_easy_cleanup(curl_); curl_global_cleanup(); }
 
     void SetUrl(const std::string& url) { url_ = url;   }
 
