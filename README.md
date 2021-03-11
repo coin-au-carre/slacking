@@ -12,7 +12,7 @@
 No special requirement. You should already have these :
 
 + C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7), GCC (4.9, 5), MSCV (VS 14 2015, VS 15 2017)
-+ [libcurl](https://curl.se/libcurl/) (which you probably already have. For Windows user check  )
++ [libcurl](https://curl.se/libcurl/)
 
 Note: *Slacking*  uses [Nlohmann Json](https://github.com/nlohmann/json) which is available in `include/json.hpp`
 

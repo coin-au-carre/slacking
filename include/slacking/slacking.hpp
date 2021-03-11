@@ -217,7 +217,7 @@ private:
     Slacking& slack_;
 };
 
-
+// Channels are deprecated and do not work since June 10th, 2020
 struct CategoryChannels {
     Json list(bool exclude_archived = false);
     std::vector<Channel> list_magic(bool exclude_archived = false);
@@ -229,6 +229,17 @@ private:
     Slacking& slack_;
 };
 
+struct CategoryConversations {
+    Json list(bool exclude_archived = false);
+    std::vector<Channel> list_magic(bool exclude_archived = false);
+
+    Json info(const std::string& channel_id);
+
+    CategoryConversations(Slacking& slack) : slack_{slack} {}
+
+private:
+    Slacking& slack_;
+};
 
 // Chat category structure for chat related method such as chat.postMessage. Every public data members can be manually filled.
 struct CategoryChat {
@@ -483,13 +494,14 @@ private:
     Session    session_;
 
 public:
-    std::string         token_;
-    bool                throw_exception_;
-    CategoryApi         api     {*this};
-    CategoryChannels    channels{*this};
-    CategoryChat        chat    {*this};
-    CategoryUsers       users   {*this};
-    CategoryWebHook     hook    {*this};
+    std::string             token_;
+    bool                    throw_exception_;
+    CategoryApi             api     {*this};
+    CategoryChannels        channels{*this};
+    CategoryConversations   conversations{*this};
+    CategoryChat            chat    {*this};
+    CategoryUsers           users   {*this};
+    CategoryWebHook         hook    {*this};
 };
 
 inline 
@@ -604,6 +616,11 @@ CategoryChannels& channels() {
 }
 
 inline
+CategoryConversations& conversations() {
+    return instance().conversations;
+}
+
+inline
 CategoryChat& chat() {
     return instance().chat;
 }
@@ -644,6 +661,32 @@ auto CategoryChannels::list_magic(bool exclude_archived) -> std::vector<Channel>
 inline
 Json CategoryChannels::info(const std::string& channel_id) {
     auto json = slack_.post("channels.info", {{"channel", channel_id}});
+    return json["channel"];
+}
+
+// https://api.slack.com/methods/conversations.list
+// Lists all channels in a Slack team.
+inline
+Json CategoryConversations::list(bool exclude_archived) {
+    auto exclude_archived_char = exclude_archived ? true : false;
+    auto json = slack_.post("conversations.list", {{"token", slack_.token_}, {"exclude_archived", exclude_archived_char }});
+    return json["channels"];
+}
+
+inline
+auto CategoryConversations::list_magic(bool exclude_archived) -> std::vector<Channel> {
+    auto json_channels = list(exclude_archived);
+    auto channels = std::vector<Channel>{};
+    channels.reserve(json_channels.size());
+    for (auto channel : json_channels) {
+        channels.emplace_back(channel["id"], channel["name"], channel["num_members"]);
+    }
+    return channels;
+}
+
+inline
+Json CategoryConversations::info(const std::string& channel_id) {
+    auto json = slack_.post("conversations.info", {{"channel", channel_id}});
     return json["channel"];
 }
 
@@ -736,6 +779,7 @@ using _detail::get;
 // Helper category getters
 using _detail::api;
 using _detail::channels;
+using _detail::conversations;
 using _detail::chat;
 using _detail::users;
 
