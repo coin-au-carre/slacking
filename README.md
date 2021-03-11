@@ -1,6 +1,6 @@
 # Slacking - Be lazy and send messages easily in Slack with C++
 
-[![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)  [![Standard](https://img.shields.io/badge/c%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT) [![Build Status](https://travis-ci.org/coin-au-carre/slacking.svg?branch=master)](https://travis-ci.org/coin-au-carre/slacking) [![Build status](https://ci.appveyor.com/api/projects/status/9v928kd5cwd82pt9?svg=true)](https://ci.appveyor.com/project/coin-au-carre/slacking) [![GitHub version](https://badge.fury.io/gh/coin-au-carre%2Fslacking.svg)](https://github.com/coin-au-carre/slacking/releases)
+[![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)  [![Standard](https://img.shields.io/badge/c%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT) [![Build Status](https://travis-ci.org/coin-au-carre/slacking.svg?branch=master)](https://travis-ci.org/coin-au-carre/slacking) [![Build status](https://ci.appveyor.com/api/projects/status/9v928kd5cwd82pt9?svg=true)](https://ci.appveyor.com/project/coin-au-carre/slacking) [![GitHub version](https://badge.fury.io/gh/coin-au-carre%2Fslacking.svg)](https://github.com/coin-au-carre/slacking/releases) [![Slack Channel](https://img.shields.io/badge/slack-@demo-pink.svg)](https://join.slack.com/t/olrea/shared_invite/zt-nj68r01f-bMq_QCrDRXBxvTVapmFXvg)
 
 ## Simple C++ Slack API
 
@@ -12,7 +12,7 @@
 No special requirement. You should already have these :
 
 + C++11 compatible compiler. Tested with Clang (3.5, 3.6, 3.7), GCC (4.9, 5), MSCV (VS 14 2015, VS 15 2017)
-+ [libcurl](https://curl.se/libcurl/) (which you probably already have. For Windows user check  )
++ [libcurl](https://curl.se/libcurl/)
 
 Note: *Slacking*  uses [Nlohmann Json](https://github.com/nlohmann/json) which is available in `include/json.hpp`
 

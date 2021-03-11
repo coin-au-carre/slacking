@@ -38,7 +38,6 @@ int main() {
     slack.chat.postMessage("Hello there!"); // will send the message "Hello there!" in the channel #general
 
     // Example 1
-
     // You can also use the generic post slack approach. Parameters (except the token) will not be taken into account.
     // Everything from the Web Slack API is possible here!
     slack::post (   

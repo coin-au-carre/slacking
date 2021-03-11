@@ -1,9 +1,9 @@
-#ifndef SLACKING_HPP_
-#define SLACKING_HPP_
+// Slacking, a modern C++ 11 library for communicating with the Web Slack API
+// https://github.com/coin-au-carre/slacking
 
 // The MIT License (MIT)
 // 
-// Copyright (c) 2016, 2017 Florian Dang
+// Copyright (c) 2016 Florian Dang
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#ifndef SLACKING_HPP_
+#define SLACKING_HPP_
+
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -37,6 +40,7 @@
 #endif
 
 #include "json.hpp"  // nlohmann/json
+
 
 #if SLACKING_VERBOSE_OUTPUT
 # pragma message ("SLACKING_VERBOSE_OUTPUT is ON")
@@ -213,20 +217,18 @@ private:
     Slacking& slack_;
 };
 
-
-
-
-struct CategoryChannels {
+// Conversations replace now Channels which are deprecated and do not work since June 10th, 2020
+struct CategoryConversations {
     Json list(bool exclude_archived = false);
     std::vector<Channel> list_magic(bool exclude_archived = false);
 
     Json info(const std::string& channel_id);
 
-    CategoryChannels(Slacking& slack) : slack_{slack} {}
+    CategoryConversations(Slacking& slack) : slack_{slack} {}
+
 private:
     Slacking& slack_;
 };
-
 
 // Chat category structure for chat related method such as chat.postMessage. Every public data members can be manually filled.
 struct CategoryChat {
@@ -300,7 +302,7 @@ struct User {
         : id{i}, name{n}, email{e}, real_name{r}, presence{p}, is_bot{bot} {}
 };
 
-// Channel convenient structure for channels.list
+// Channel convenient structure for conversations.list
 struct Channel {
     std::string id;
     std::string name;
@@ -338,7 +340,6 @@ std::string join(const std::vector<T>& vec, const std::string& sep = "&");
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 
 
-
 class Slacking {
 public:
     Slacking() = delete;
@@ -363,7 +364,7 @@ public:
         if (throw_exception_) 
             throw std::runtime_error(msg);
         else 
-            std::cerr << "[slacking] error " << msg << '\n';
+            std::cerr << "[slacking] error. Reason: " << msg << '\n';
     }
 
     Json post(const std::string& method, const std::string& data = "") {
@@ -455,10 +456,9 @@ private:
             else {
                 if (json.count("error")) {
                     auto reason = json["error"].dump();
-                    // trigger_error(reason);
-                    std::cerr << "[slacking] warning! " << method << " checkResponse() failed " << reason << '\n';
+                    trigger_error(reason);
 #if SLACKING_VERBOSE_OUTPUT
-                    std::cerr << json << std::endl;
+                    std::cerr << "<< checkResponse() error details: " << json << std::endl;
 #endif
                 }
                 else {
@@ -483,13 +483,13 @@ private:
     Session    session_;
 
 public:
-    std::string         token_;
-    bool                throw_exception_;
-    CategoryApi         api     {*this};
-    CategoryChannels    channels{*this};
-    CategoryChat        chat    {*this};
-    CategoryUsers       users   {*this};
-    CategoryWebHook     hook    {*this};
+    std::string             token_;
+    bool                    throw_exception_;
+    CategoryApi             api     {*this};
+    CategoryConversations   conversations{*this};
+    CategoryChat            chat    {*this};
+    CategoryUsers           users   {*this};
+    CategoryWebHook         hook    {*this};
 };
 
 inline 
@@ -570,14 +570,11 @@ std::ostream& operator<<(std::ostream &os, const std::vector<T>& vec) {
     return os << "\b\n]";
 }
 
-
 inline
 Slacking& create(const std::string& token, bool throw_exception = true)  {
     static Slacking instance(token, throw_exception);
     return instance;
 }
-
-
 
 inline
 Slacking& instance() {
@@ -602,8 +599,8 @@ CategoryApi& api() {
 }
 
 inline
-CategoryChannels& channels() {
-    return instance().channels;
+CategoryConversations& conversations() {
+    return instance().conversations;
 }
 
 inline
@@ -619,38 +616,38 @@ CategoryUsers& users() {
 
 // Definitions of category methods
 
+// https://api.slack.com/methods/api.test
 inline
 Json CategoryApi::test() {
     auto json = slack_.get("api.test");
     return json;
 }
 
-
+// https://api.slack.com/methods/conversations.list
+// Lists all channels in a Slack team.
 inline
-Json CategoryChannels::list(bool exclude_archived) {
-    auto exclude_archived_char = exclude_archived ? "1" : "0";
-    auto json = slack_.post("channels.list", {{"token", slack_.token_}, {"exclude_archived", exclude_archived_char }});
+Json CategoryConversations::list(bool exclude_archived) {
+    auto exclude_archived_char = exclude_archived ? true : false;
+    auto json = slack_.post("conversations.list", {{"token", slack_.token_}, {"exclude_archived", exclude_archived_char }});
     return json["channels"];
 }
 
 inline
-auto CategoryChannels::list_magic(bool exclude_archived) -> std::vector<Channel> {
+auto CategoryConversations::list_magic(bool exclude_archived) -> std::vector<Channel> {
     auto json_channels = list(exclude_archived);
-    auto users = std::vector<Channel>{};
-    users.reserve(json_channels.size());
+    auto channels = std::vector<Channel>{};
+    channels.reserve(json_channels.size());
     for (auto channel : json_channels) {
-        users.emplace_back(channel["id"], channel["name"], channel["num_members"]);
+        channels.emplace_back(channel["id"], channel["name"], channel["num_members"]);
     }
-    return users;
+    return channels;
 }
 
 inline
-Json CategoryChannels::info(const std::string& channel_id) {
-    auto json = slack_.post("channels.info", {{"channel", channel_id}});
+Json CategoryConversations::info(const std::string& channel_id) {
+    auto json = slack_.post("conversations.info", {{"channel", channel_id}});
     return json["channel"];
 }
-
- 
 
 inline
 Json CategoryChat::postMessage(const std::string& text, const std::string& specified_channel) {
@@ -740,7 +737,7 @@ using _detail::get;
 
 // Helper category getters
 using _detail::api;
-using _detail::channels;
+using _detail::conversations;
 using _detail::chat;
 using _detail::users;
 
@@ -749,4 +746,3 @@ using _detail::Json;
 } // namespace slack
 
 #endif // SLACKING_HPP_
-
