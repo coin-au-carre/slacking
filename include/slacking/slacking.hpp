@@ -217,18 +217,7 @@ private:
     Slacking& slack_;
 };
 
-// Channels are deprecated and do not work since June 10th, 2020
-struct CategoryChannels {
-    Json list(bool exclude_archived = false);
-    std::vector<Channel> list_magic(bool exclude_archived = false);
-
-    Json info(const std::string& channel_id);
-
-    CategoryChannels(Slacking& slack) : slack_{slack} {}
-private:
-    Slacking& slack_;
-};
-
+// Conversations replace now Channels which are deprecated and do not work since June 10th, 2020
 struct CategoryConversations {
     Json list(bool exclude_archived = false);
     std::vector<Channel> list_magic(bool exclude_archived = false);
@@ -313,7 +302,7 @@ struct User {
         : id{i}, name{n}, email{e}, real_name{r}, presence{p}, is_bot{bot} {}
 };
 
-// Channel convenient structure for channels.list
+// Channel convenient structure for conversations.list
 struct Channel {
     std::string id;
     std::string name;
@@ -497,7 +486,6 @@ public:
     std::string             token_;
     bool                    throw_exception_;
     CategoryApi             api     {*this};
-    CategoryChannels        channels{*this};
     CategoryConversations   conversations{*this};
     CategoryChat            chat    {*this};
     CategoryUsers           users   {*this};
@@ -611,11 +599,6 @@ CategoryApi& api() {
 }
 
 inline
-CategoryChannels& channels() {
-    return instance().channels;
-}
-
-inline
 CategoryConversations& conversations() {
     return instance().conversations;
 }
@@ -633,35 +616,11 @@ CategoryUsers& users() {
 
 // Definitions of category methods
 
+// https://api.slack.com/methods/api.test
 inline
 Json CategoryApi::test() {
     auto json = slack_.get("api.test");
     return json;
-}
-
-
-inline
-Json CategoryChannels::list(bool exclude_archived) {
-    auto exclude_archived_char = exclude_archived ? "1" : "0";
-    auto json = slack_.post("channels.list", {{"token", slack_.token_}, {"exclude_archived", exclude_archived_char }});
-    return json["channels"];
-}
-
-inline
-auto CategoryChannels::list_magic(bool exclude_archived) -> std::vector<Channel> {
-    auto json_channels = list(exclude_archived);
-    auto users = std::vector<Channel>{};
-    users.reserve(json_channels.size());
-    for (auto channel : json_channels) {
-        users.emplace_back(channel["id"], channel["name"], channel["num_members"]);
-    }
-    return users;
-}
-
-inline
-Json CategoryChannels::info(const std::string& channel_id) {
-    auto json = slack_.post("channels.info", {{"channel", channel_id}});
-    return json["channel"];
 }
 
 // https://api.slack.com/methods/conversations.list
@@ -778,7 +737,6 @@ using _detail::get;
 
 // Helper category getters
 using _detail::api;
-using _detail::channels;
 using _detail::conversations;
 using _detail::chat;
 using _detail::users;
@@ -788,4 +746,3 @@ using _detail::Json;
 } // namespace slack
 
 #endif // SLACKING_HPP_
-
