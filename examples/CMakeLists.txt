@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 project(examples)
 
@@ -12,6 +12,8 @@ if(CURL_STATIC_LINKING)
     message("-DCURL_STATICLIB [added]")
     add_definitions(-DCURL_STATICLIB)
 endif()
+
+add_definitions(-DJSON_USE_IMPLICIT_CONVERSIONS=0)
 
 find_package(CURL REQUIRED)
 
