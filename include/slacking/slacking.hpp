@@ -638,7 +638,7 @@ auto CategoryConversations::list_magic(bool exclude_archived) -> std::vector<Cha
     auto channels = std::vector<Channel>{};
     channels.reserve(json_channels.size());
     for (auto channel : json_channels) {
-        channels.emplace_back(channel["id"], channel["name"], channel["num_members"]);
+        channels.emplace_back(channel["id"].get<std::string>(), channel["name"].get<std::string>(), channel["num_members"].get<int>());
     }
     return channels;
 }
@@ -706,9 +706,9 @@ auto CategoryUsers::list_magic(bool presence) -> std::vector<User> {
         auto email = member["profile"].count("email") ? member["profile"]["email"].dump() : ""; // dump here because email can be null
         bool is_bot = true;
         if (member["is_bot"].is_boolean()) { 
-            is_bot = member["is_bot"]; 
+            is_bot = member["is_bot"].get<bool>(); 
         }
-        users.emplace_back(member["id"], member["name"], email, member["profile"]["real_name"], presence_json, is_bot);
+        users.emplace_back(member["id"].get<std::string>(), member["name"].get<std::string>(), email, member["profile"]["real_name"].get<std::string>(), presence_json.get<std::string>(), is_bot);
     }
     return users;
 }
